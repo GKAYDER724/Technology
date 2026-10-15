@@ -29,7 +29,6 @@ Route::get('/login', [AuthController::class, 'showLogin'])
 Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:5,1')
     ->name('login.submit');
-
 // Đăng ký
 Route::get('/register', [AuthController::class, 'showRegister'])
     ->name('register');
@@ -62,11 +61,7 @@ Route::middleware('auth')->group(function () {
             ->name('cart.checkout');
 
         // Đơn hàng
-        Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/{id}', [OrderController::class, 'show']);
-        Route::get('/orders/{id}/cancel', [OrderController::class, 'cancel']);
-
-        // Danh sách đánh giá
         Route::get('/reviews', [ReviewController::class, 'index'])
             ->name('reviews.index');
 
@@ -78,7 +73,6 @@ Route::middleware('auth')->group(function () {
     // Xem hồ sơ cá nhân
     Route::get('/account/profile', [AccountController::class, 'profile'])
         ->name('account.profile');
-
     // Cập nhật hồ sơ cá nhân
     Route::put('/account/profile', [AccountController::class, 'update'])
         ->name('account.profile.update');

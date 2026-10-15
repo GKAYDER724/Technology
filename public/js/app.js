@@ -727,7 +727,6 @@ if (profileForm) {
 
     const passwordForm = document.getElementById('profile-password-form');
 
-
     if (passwordForm) {
         passwordForm.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -939,6 +938,5 @@ if (profileForm) {
             }
         });
     }
-
 
 });

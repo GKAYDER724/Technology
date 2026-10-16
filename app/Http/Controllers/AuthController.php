@@ -91,9 +91,11 @@ class AuthController extends Controller
         ]);
 
         $user = User::create([
-            'name' => $validated['name'],
+            'role_id' => 3,
+            'fullname' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'status' => 'active',
         ]);
 
         Auth::login($user);

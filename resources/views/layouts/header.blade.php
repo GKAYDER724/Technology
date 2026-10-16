@@ -92,12 +92,12 @@
                         </a>
                     </div>
 
-                    <div class="et-dropdown-bottom">
-                        <a href="{{ url('/source-code') }}">
-                            <i class="bi bi-code-slash"></i>
-                            <span>Đăng xuất</span>
-                        </a>
-                    </div>
+                   
+                        <form action="{{ route('logout') }}" method="POST">
+                             @csrf
+                             <button type="submit">Đăng xuất</button>
+                        </form>
+
 
                 </div>
             </div>

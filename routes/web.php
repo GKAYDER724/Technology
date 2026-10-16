@@ -9,6 +9,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\WarrantyController;
 
 
 // 1. Trang chủ
@@ -62,3 +63,25 @@ Route::post('/register', [AuthController::class, 'register'])
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
+// Warranty Routes
+Route::prefix('warranty')
+    ->name('warranty.')
+    ->controller(WarrantyController::class)
+    ->group(function () {
+
+        // Warranty overview
+        Route::get('/', 'index')
+            ->name('index');
+
+        // Create warranty request
+        Route::get('/create-request', 'create')
+            ->name('create');
+
+        // Check warranty status
+        Route::get('/status', 'status')
+            ->name('status');
+
+        // Warranty history
+        Route::get('/history', 'history')
+            ->name('history');
+    });

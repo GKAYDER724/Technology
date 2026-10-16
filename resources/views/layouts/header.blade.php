@@ -86,6 +86,11 @@
                             <span>Quản lý đơn hàng</span>
                         </a>
 
+                        <a href="{{ route('warranty.index') }}">
+                            <i class="bi bi-shield-check"></i>
+                            <span>Quản lý bảo hành</span>
+                        </a>
+
                         <a href="{{ url('/notifications') }}">
                             <i class="bi bi-bell"></i>
                             <span>Thông báo</span>

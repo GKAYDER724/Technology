@@ -26,10 +26,10 @@ use Filament\Models\Contracts\HasName;
 
 class User extends Authenticatable implements FilamentUser, HasName
 {
-    protected $primaryKey = 'user_id';
+        protected $primaryKey = 'user_id';
 
     public $timestamps = false;
-/** @use HasFactory<UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
      /**
@@ -48,6 +48,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     protected function casts(): array
     {
         return [
+            
             'password' => 'hashed',
         ];
     }

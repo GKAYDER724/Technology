@@ -28,7 +28,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 
 #[Hidden(['password', 'remember_token'])]
-
 class User extends Authenticatable implements FilamentUser, HasName
 {
     protected $primaryKey = 'user_id';

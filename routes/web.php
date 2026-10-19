@@ -11,39 +11,14 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\WarrantyController;
 
-
-// 1. Trang chủ
+//  Trang chủ
 Route::get('/', [HomeController::class, 'index']);
 
-// 2. Trang danh sách sản phẩm
+//  Danh sách và chi tiết sản phẩm
 Route::get('/products', [ProductController::class, 'index']);
-
-// 3. Trang chi tiết sản phẩm
 Route::get('/products/{id}', [ProductController::class, 'show']);
 
-// 4. Trang giỏ hàng
-Route::get('/cart', [CartController::class, 'index']);
-
-// 5. Trang thanh toán
-Route::get('/checkout', [CartController::class, 'checkout']);
-
-// 6. Trang lịch sử và chi tiết đơn hàng
-Route::get('/orders', [OrderController::class, 'index']);
-Route::get('/orders/{id}', [OrderController::class, 'show']);
-
-// 7. Trang yêu cầu hủy đơn
-Route::get('/orders/{id}/cancel', [OrderController::class, 'cancel']);
-
-// 8. Trang đánh giá sản phẩm
-Route::get('/reviews', [ReviewController::class, 'index']);
-
-// 9. Trang tài khoản cá nhân: thông tin cá nhân
-Route::get('/account/profile', [AccountController::class, 'profile']);
-
-// 10. Trang thông báo
-Route::get('/notifications', [NotificationController::class, 'index']);
-
-// Trang đăng nhập
+//  Đăng nhập
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
 
@@ -51,13 +26,14 @@ Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:5,1')
     ->name('login.submit');
 
-// Trang đăng ký
+//  Đăng ký
 Route::get('/register', [AuthController::class, 'showRegister'])
     ->name('register');
 
 Route::post('/register', [AuthController::class, 'register'])
     ->middleware('throttle:5,1')
     ->name('register.submit');
+
 
 // Đăng xuất
 Route::post('/logout', [AuthController::class, 'logout'])
@@ -85,3 +61,33 @@ Route::prefix('warranty')
         Route::get('/history', 'history')
             ->name('history');
     });
+
+//  Các chức năng yêu cầu đăng nhập
+Route::middleware('auth')->group(function () {
+
+    //  Các chức năng dành cho Customer
+    Route::middleware('role:customer')->group(function () {
+
+        // Giỏ hàng và thanh toán
+        Route::get('/cart', [CartController::class, 'index']);
+        Route::get('/checkout', [CartController::class, 'checkout']);
+
+        // Đơn hàng
+        Route::get('/orders', [OrderController::class, 'index']);
+        Route::get('/orders/{id}', [OrderController::class, 'show']);
+        Route::get('/orders/{id}/cancel', [OrderController::class, 'cancel']);
+
+        // Đánh giá
+        Route::get('/reviews', [ReviewController::class, 'index']);
+    });
+
+    //  Tài khoản
+    Route::get('/account/profile', [AccountController::class, 'profile']);
+
+    //  Thông báo
+    Route::get('/notifications', [NotificationController::class, 'index']);
+
+    //  Đăng xuất
+    Route::post('/logout', [AuthController::class, 'logout'])
+        ->name('logout');
+});

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Data\MockData;
 
-class OrderController
+class OrderController extends Controller
 {
     public function index()
     {

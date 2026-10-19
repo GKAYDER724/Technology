@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
+use Filament\Models\Contracts\HasName;
 #[Fillable([
     'role_id',
     'fullname',
@@ -20,7 +22,7 @@ use Illuminate\Notifications\Notifiable;
     'status',
 ])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser, HasName
 {
         protected $primaryKey = 'user_id';
 
@@ -33,6 +35,12 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+
+    public function canAccessPanel(Panel $panel): bool
+{
+    return in_array((int) $this->role_id, [1, 2], true)
+        && $this->status === 'active';
+}
     protected function casts(): array
     {
         return [
@@ -40,4 +48,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function getFilamentName(): string
+{
+    return (string) ($this->fullname ?? $this->email ?? 'Admin');
+}
 }

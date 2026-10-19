@@ -110,3 +110,4 @@ Route::prefix('warranty')
         Route::get('/history', 'history')
             ->name('history');
     });
+

@@ -48,64 +48,83 @@
 
 
             <div class="et-account-wrapper">
-                <button type="button" class="et-account" id="etAccountToggle" aria-expanded="false"
-                    aria-controls="etAccountDropdown">
 
-                    <span class="et-avatar">
-                        <i class="bi bi-person-fill"></i>
-                    </span>
+    @auth
+        {{-- ĐÃ ĐĂNG NHẬP --}}
+        @php
+            $user = Auth::user();
+        @endphp
 
-                    <span class="et-account-text">
-                        <strong>Nguyễn Văn Hùng</strong>
-                        <small>Tech VIP</small>
-                    </span>
+        <button type="button" class="et-account" id="etAccountToggle"
+            aria-expanded="false" aria-controls="etAccountDropdown">
 
-                    <i class="bi bi-chevron-down et-account-chevron"></i>
-                </button>
+            <span class="et-avatar">
+                <i class="bi bi-person-fill"></i>
+            </span>
 
-                <div class="et-account-dropdown" id="etAccountDropdown">
+            <span class="et-account-text">
+                <strong>{{ $user->fullname }}</strong>
+                <small>Tech VIP</small>
+            </span>
 
-                    <div class="et-dropdown-profile">
-                        <strong>Nguyễn Văn Hùng</strong>
-                        <span>hung.nguyen@gmail.com</span>
+            <i class="bi bi-chevron-down et-account-chevron"></i>
+        </button>
 
-                        <div class="et-vip-info">
-                            <span>Tech VIP</span>
-                            <strong>1.250 điểm</strong>
-                        </div>
-                    </div>
+        <div class="et-account-dropdown" id="etAccountDropdown">
 
-                    <div class="et-dropdown-links">
-                        <a href="{{ url('/account/profile') }}">
-                            <i class="bi bi-person"></i>
-                            <span>Thông tin tài khoản</span>
-                        </a>
+            <div class="et-dropdown-profile">
+                <strong>{{ $user->fullname }}</strong>
+                <span>{{ $user->email }}</span>
 
-                        <a href="{{ url('/orders') }}">
-                            <i class="bi bi-box-seam"></i>
-                            <span>Quản lý đơn hàng</span>
-                        </a>
-
-                        <a href="{{ route('warranty.index') }}">
-                            <i class="bi bi-shield-check"></i>
-                            <span>Quản lý bảo hành</span>
-                        </a>
-
-                        <a href="{{ url('/notifications') }}">
-                            <i class="bi bi-bell"></i>
-                            <span>Thông báo</span>
-                        </a>
-                    </div>
-
-                   
-                        <form action="{{ route('logout') }}" method="POST">
-                             @csrf
-                             <button type="submit">Đăng xuất</button>
-                        </form>
-
-
+                <div class="et-vip-info">
+                    <span>Tech VIP</span>
+                    <strong>1.250 điểm</strong>
                 </div>
             </div>
+<div class="et-dropdown-links">
+                <a href="{{ url('/account/profile') }}">
+                    <i class="bi bi-person"></i>
+                    <span>Thông tin tài khoản</span>
+                </a>
+
+                <a href="{{ url('/orders') }}">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Quản lý đơn hàng</span>
+                </a>
+
+                <a href="{{ url('/notifications') }}">
+                    <i class="bi bi-bell"></i>
+                    <span>Thông báo</span>
+                </a>
+            </div>
+
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit">Đăng xuất</button>
+            </form>
+
+        </div>
+
+    @else
+        {{-- CHƯA ĐĂNG NHẬP --}}
+        <div class="et-account">
+            <span class="et-avatar">
+                <i class="bi bi-person-fill"></i>
+            </span>
+
+            <span class="et-account-text">
+                <a href="{{ url('/login') }}">
+                    <strong>Đăng nhập</strong>
+                </a>
+                <small>
+                    <a href="{{ url('/register') }}">Đăng ký tài khoản</a>
+                </small>
+            </span>
+        </div>
+
+    @endauth
+
+</div>
 
 
         </div>

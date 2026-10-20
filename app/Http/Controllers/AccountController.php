@@ -20,7 +20,6 @@ class AccountController
 
     // Cập nhật hồ sơ cá nhân
 
-
 public function update(Request $request)
 {
     /** @var User $user */
@@ -37,7 +36,6 @@ public function update(Request $request)
     ]);
 
     // Laravel tự kiểm tra dữ liệu và trả lỗi về form nếu không hợp lệ
-
 $validated = $request->validate([
     'fullname' => [
         'required',

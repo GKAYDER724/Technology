@@ -150,6 +150,7 @@
                             <label for="profile-phone">
                                 Số điện thoại <b>*</b>
                             </label>
+
                             <input
                                 type="tel"
                                 id="profile-phone"
@@ -332,6 +333,7 @@
 
                 {{-- CHANGE PASSWORD --}}
                 <div class="et-profile-password-section">
+
                     <div class="et-profile-section-heading">
                         <h2>
                             <i class="bi bi-lock"></i>
@@ -376,6 +378,7 @@
                                 <label for="current-password">
                                     Mật khẩu hiện tại
                                 </label>
+
                                 <input
                                     type="password"
                                     id="current-password"
@@ -386,6 +389,7 @@
 
                             <div class="et-profile-field">
                                 <label for="new-password">Mật khẩu mới</label>
+
                                 <input
                                     type="password"
                                     id="new-password"
@@ -399,6 +403,7 @@
                                 <label for="confirm-password">
                                     Xác nhận mật khẩu
                                 </label>
+
                                 <input
                                     type="password"
                                     id="confirm-password"
@@ -418,6 +423,7 @@
                             </button>
                         </div>
                     </form>
+
                 </div>
             </section>
 

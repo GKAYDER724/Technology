@@ -9743,3 +9743,59 @@ body.pd-review-modal-open {
         transition: none !important;
     }
 }
+.et-profile-field .field-error,
+.et-password-errors .field-error {
+    display: block;
+    color: #dc3545;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 6px;
+    font-weight: 500;
+}
+
+.et-profile-field .input-error {
+    border: 1px solid #dc3545 !important;
+}
+
+.et-profile-field .input-error:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+}
+
+.et-password-errors {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+/* Hỗ trợ cả input và select */
+.et-profile-field input,
+.et-profile-field select {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    color: #1f2937;
+    font: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.et-profile-field input:focus,
+.et-profile-field select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Bổ sung select vào phần báo lỗi hiện có */
+.et-profile-field .input-error {
+    border: 1px solid #dc3545 !important;
+    background-color: #fffafa;
+}
+
+.et-profile-field .input-error:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+}

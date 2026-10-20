@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -10,14 +11,14 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AuthController;
 
-//  Trang chủ
+// Trang chủ
 Route::get('/', [HomeController::class, 'index']);
 
-//  Danh sách và chi tiết sản phẩm
+// Danh sách và chi tiết sản phẩm
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 
-//  Đăng nhập
+// Đăng nhập
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
 
@@ -25,7 +26,7 @@ Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:5,1')
     ->name('login.submit');
 
-//  Đăng ký
+// Đăng ký
 Route::get('/register', [AuthController::class, 'showRegister'])
     ->name('register');
 
@@ -33,10 +34,10 @@ Route::post('/register', [AuthController::class, 'register'])
     ->middleware('throttle:5,1')
     ->name('register.submit');
 
-//  Các chức năng yêu cầu đăng nhập
+// Các chức năng yêu cầu đăng nhập
 Route::middleware('auth')->group(function () {
 
-    //  Các chức năng dành cho Customer
+    // Các chức năng dành cho Customer
     Route::middleware('role:customer')->group(function () {
 
         // Giỏ hàng và thanh toán
@@ -52,13 +53,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/reviews', [ReviewController::class, 'index']);
     });
 
-    //  Tài khoản
-    Route::get('/account/profile', [AccountController::class, 'profile']);
+    // Xem hồ sơ cá nhân
+    Route::get('/account/profile', [AccountController::class, 'profile'])
+        ->name('account.profile');
 
-    //  Thông báo
+    // Cập nhật hồ sơ cá nhân
+    Route::put('/account/profile', [AccountController::class, 'update'])
+        ->name('account.profile.update');
+
+    // Đổi mật khẩu
+    Route::put('/account/password', [AccountController::class, 'changePassword'])
+        ->name('account.password.update');
+
+    // Thông báo
     Route::get('/notifications', [NotificationController::class, 'index']);
 
-    //  Đăng xuất
+    // Đăng xuất
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
 });

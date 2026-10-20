@@ -12,6 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Filament\Models\Contracts\HasName;
+
 #[Fillable([
     'role_id',
     'fullname',
@@ -19,8 +20,12 @@ use Filament\Models\Contracts\HasName;
     'password',
     'phone',
     'address',
+    'date_of_birth',
+    'gender',
+    'province_city',
     'status',
 ])]
+
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser, HasName
 {

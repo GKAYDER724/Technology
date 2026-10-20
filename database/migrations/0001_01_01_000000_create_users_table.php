@@ -19,6 +19,9 @@ return new class extends Migration
             $table->string('password');
             $table->string('phone', 20)->nullable();
             $table->string('address', 500)->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->string('gender', 10)->nullable();
+            $table->string('province_city', 120)->nullable();
             $table->string('status', 20)->default('active');
         });
 

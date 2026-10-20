@@ -3,10 +3,11 @@
 @section('title', 'Tài khoản cá nhân - ElectroTech')
 
 @section('content')
+
 <main class="et-profile-page">
     <div class="et-profile-container">
 
-        {{-- Breadcrumb --}}
+        {{-- BREADCRUMB --}}
         <div class="et-profile-breadcrumb">
             <a href="{{ url('/') }}">Trang chủ</a>
             <i class="bi bi-chevron-right"></i>
@@ -20,13 +21,12 @@
                     <div class="et-profile-avatar">
                         <img
                             src="https://i.pravatar.cc/160?img=12"
-                            alt="Ảnh đại diện Nguyễn Văn Hùng"
-                        >
+                            alt="Ảnh đại diện">
                     </div>
 
                     <div class="et-profile-user-info">
                         <h1>
-                            Nguyễn Văn Hùng
+                            {{ $user->fullname }}
                             <span class="et-vip-badge">
                                 <i class="bi bi-award-fill"></i>
                                 Tech VIP
@@ -34,9 +34,9 @@
                         </h1>
 
                         <p class="et-profile-contact">
-                            hung.nguyen@gmail.com
+                            {{ $user->email }}
                             <span>•</span>
-                            0912 345 678
+                            {{ $user->phone ?? 'Chưa cập nhật số điện thoại' }}
                         </p>
 
                         <div class="et-profile-loyalty">
@@ -93,109 +93,247 @@
                     <span>Cập nhật thông tin nhận hàng và tài khoản</span>
                 </div>
 
-                <form id="profile-update-form" class="et-profile-form">
+                {{-- THÔNG BÁO THÀNH CÔNG --}}
+                @if (session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+                @endif
+
+
+                @if ($errors->any())
+                <div class="alert alert-danger" role="alert">
+                    <strong>Vui lòng kiểm tra lại thông tin.</strong>
+                    <ul style="margin: 8px 0 0; padding-left: 20px;">
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
+                {{-- PROFILE FORM --}}
+                <form
+                    id="profile-update-form"
+                    class="et-profile-form"
+                    action="{{ route('account.profile.update') }}"
+                    method="POST">
+                    @csrf
+                    @method('PUT')
 
                     <div class="et-profile-fields">
+
+                        {{-- FULL NAME --}}
                         <div class="et-profile-field">
                             <label for="profile-name">
                                 Họ và tên đầy đủ <b>*</b>
                             </label>
+
                             <input
                                 type="text"
                                 id="profile-name"
-                                name="name"
-                                value="Nguyễn Văn Hùng"
+                                name="fullname"
+                                value="{{ old('fullname', $user->fullname) }}"
+                                maxlength="120"
+                                pattern="[\p{L}\p{M}]+([ ]+[\p{L}\p{M}]+)*"
+                                title="Họ tên chỉ được chứa chữ cái và khoảng trắng."
                                 required
-                            >
+                                class="@error('fullname') input-error @enderror">
+
+                            @error('fullname')
+                            <small class="field-error">{{ $message }}</small>
+                            @enderror
                         </div>
 
+                        {{-- PHONE --}}
                         <div class="et-profile-field">
                             <label for="profile-phone">
                                 Số điện thoại <b>*</b>
                             </label>
+
                             <input
                                 type="tel"
                                 id="profile-phone"
                                 name="phone"
-                                value="0912 345 678"
+                                value="{{ old('phone', $user->phone) }}"
+                                inputmode="numeric"
+                                pattern="[0-9]{10,11}"
+                                minlength="10"
+                                maxlength="11"
+                                title="Vui lòng nhập số điện thoại gồm 10–11 chữ số."
                                 required
-                            >
+                                class="@error('phone') input-error @enderror">
+
+                            @error('phone')
+                            <small class="field-error">{{ $message }}</small>
+                            @enderror
                         </div>
 
+                        {{-- EMAIL --}}
                         <div class="et-profile-field">
                             <label for="profile-email">Email tài khoản</label>
+
                             <input
                                 type="email"
                                 id="profile-email"
-                                name="email"
-                                value="hung.nguyen@gmail.com"
-                            >
+                                value="{{ $user->email }}"
+                                readonly>
                         </div>
 
+                        {{-- BIRTHDAY --}}
                         <div class="et-profile-field">
                             <label for="profile-birthday">Ngày sinh</label>
+
                             <input
                                 type="date"
                                 id="profile-birthday"
-                                name="birthday"
-                                value="1995-08-15"
-                            >
+                                name="date_of_birth"
+                                value="{{ old('date_of_birth', $user->date_of_birth) }}"
+                                max="{{ date('Y-m-d') }}"
+                                class="@error('date_of_birth') input-error @enderror">
+
+                            @error('date_of_birth')
+                            <small class="field-error">{{ $message }}</small>
+                            @enderror
                         </div>
-                    </div>
 
-                    <fieldset class="et-profile-gender">
-                        <legend>Giới tính</legend>
+                        {{-- GENDER --}}
+                        <fieldset class="et-profile-gender">
+                            <legend>Giới tính</legend>
 
-                        <label>
-                            <input type="radio" name="gender" value="male" checked>
-                            <span>Nam</span>
-                        </label>
-
-                        <label>
-                            <input type="radio" name="gender" value="female">
-                            <span>Nữ</span>
-                        </label>
-
-                        <label>
-                            <input type="radio" name="gender" value="other">
-                            <span>Khác</span>
-                        </label>
-                    </fieldset>
-
-                    <div class="et-profile-fields et-profile-address-fields">
-                        <div class="et-profile-field">
-                            <label for="profile-address">
-                                Địa chỉ giao hàng mặc định
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="male"
+                                    {{ old('gender', $user->gender) === 'male' ? 'checked' : '' }}>
+                                <span>Nam</span>
                             </label>
-                            <input
-                                type="text"
-                                id="profile-address"
-                                name="address"
-                                value="Số 45, Đường Lê Duẩn"
-                            >
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="female"
+                                    {{ old('gender', $user->gender) === 'female' ? 'checked' : '' }}>
+                                <span>Nữ</span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="other"
+                                    {{ old('gender', $user->gender) === 'other' ? 'checked' : '' }}>
+                                <span>Khác</span>
+                            </label>
+
+                            @error('gender')
+                            <small class="field-error">{{ $message }}</small>
+                            @enderror
+                        </fieldset>
+
+                        {{-- ADDRESS AND CITY --}}
+                        <div class="et-profile-fields et-profile-address-fields">
+
+                            <div class="et-profile-field">
+                                <label for="profile-address">
+                                    Địa chỉ giao hàng mặc định <b>*</b>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="profile-address"
+                                    name="address"
+                                    value="{{ old('address', $user->address) }}"
+                                    maxlength="255"
+                                    required
+                                    class="@error('address') input-error @enderror">
+
+                                @error('address')
+                                <small class="field-error">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+
+                            <div class="et-profile-field">
+                                <label for="profile-city">
+                                    Tỉnh / Thành phố <b>*</b>
+                                </label>
+
+                                <select
+                                    id="profile-city"
+                                    name="province_city"
+                                    required
+                                    class="@error('province_city') input-error @enderror">
+                                    <option value="">-- Chọn tỉnh / thành phố --</option>
+
+                                    @foreach ([
+                                    'An Giang',
+                                    'Bắc Ninh',
+                                    'Cà Mau',
+                                    'Cao Bằng',
+                                    'Đắk Lắk',
+                                    'Điện Biên',
+                                    'Đồng Nai',
+                                    'Đồng Tháp',
+                                    'Gia Lai',
+                                    'Hà Tĩnh',
+                                    'Hưng Yên',
+                                    'Khánh Hòa',
+                                    'Lai Châu',
+                                    'Lâm Đồng',
+                                    'Lạng Sơn',
+                                    'Lào Cai',
+                                    'Nghệ An',
+                                    'Ninh Bình',
+                                    'Phú Thọ',
+                                    'Quảng Ngãi',
+                                    'Quảng Ninh',
+                                    'Quảng Trị',
+                                    'Sơn La',
+                                    'Tây Ninh',
+                                    'Thái Nguyên',
+                                    'Thanh Hóa',
+                                    'Tuyên Quang',
+                                    'Vĩnh Long',
+                                    'Cần Thơ',
+                                    'Đà Nẵng',
+                                    'Hải Phòng',
+                                    'Hà Nội',
+                                    'Hồ Chí Minh',
+                                    'Huế',
+                                    ] as $province)
+                                    <option
+                                        value="{{ $province }}"
+                                        {{ old('province_city', $user->province_city) === $province ? 'selected' : '' }}>
+                                        {{ $province }}
+                                    </option>
+                                    @endforeach
+                                </select>
+
+                                @error('province_city')
+                                <small class="field-error">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+
                         </div>
 
-                        <div class="et-profile-field">
-                            <label for="profile-city">Tỉnh / Thành phố</label>
-                            <input
-                                type="text"
-                                id="profile-city"
-                                name="city"
-                                value="TP. Hồ Chí Minh"
-                            >
+                        {{-- SAVE BUTTON --}}
+                        <div class="et-profile-form-actions">
+                            <button type="submit" class="et-profile-primary-btn">
+                                <i class="bi bi-floppy"></i>
+                                Lưu Thay Đổi Thông Tin
+                            </button>
                         </div>
-                    </div>
 
-                    <div class="et-profile-form-actions">
-                        <button type="submit" class="et-profile-primary-btn">
-                            <i class="bi bi-floppy"></i>
-                            Lưu Thay Đổi Thông Tin
-                        </button>
                     </div>
                 </form>
 
                 {{-- CHANGE PASSWORD --}}
                 <div class="et-profile-password-section">
+
                     <div class="et-profile-section-heading">
                         <h2>
                             <i class="bi bi-lock"></i>
@@ -203,57 +341,89 @@
                         </h2>
                     </div>
 
-                    <form id="profile-password-form">
+                    {{-- PASSWORD SUCCESS --}}
+                    @if (session('password_success'))
+                    <div class="alert alert-success">
+                        {{ session('password_success') }}
+                    </div>
+                    @endif
+
+                    {{-- PASSWORD ERRORS --}}
+                    @if ($errors->has('current_password')
+                    || $errors->has('new_password')
+                    || $errors->has('confirm_password'))
+                    <div class="et-password-errors">
+                        @foreach ([
+                        'current_password',
+                        'new_password',
+                        'confirm_password'
+                        ] as $field)
+                        @error($field)
+                        <small class="field-error">{{ $message }}</small>
+                        @enderror
+                        @endforeach
+                    </div>
+                    @endif
+
+                    <form
+                        id="profile-password-form"
+                        action="{{ route('account.password.update') }}"
+                        method="POST">
+                        @csrf
+                        @method('PUT')
+
                         <div class="et-password-fields">
+
                             <div class="et-profile-field">
                                 <label for="current-password">
                                     Mật khẩu hiện tại
                                 </label>
+
                                 <input
                                     type="password"
                                     id="current-password"
                                     name="current_password"
                                     placeholder="Nhập mật khẩu hiện tại"
-                                    required
-                                >
+                                    required>
                             </div>
 
                             <div class="et-profile-field">
                                 <label for="new-password">Mật khẩu mới</label>
+
                                 <input
                                     type="password"
                                     id="new-password"
                                     name="new_password"
                                     placeholder="Tối thiểu 6 ký tự"
                                     minlength="6"
-                                    required
-                                >
+                                    required>
                             </div>
 
                             <div class="et-profile-field">
                                 <label for="confirm-password">
                                     Xác nhận mật khẩu
                                 </label>
+
                                 <input
                                     type="password"
                                     id="confirm-password"
                                     name="confirm_password"
                                     placeholder="Nhập lại mật khẩu mới"
                                     minlength="6"
-                                    required
-                                >
+                                    required>
                             </div>
+
                         </div>
 
                         <div class="et-profile-password-actions">
                             <button
                                 type="submit"
-                                class="et-profile-password-btn"
-                            >
+                                class="et-profile-password-btn">
                                 Cập nhật mật khẩu
                             </button>
                         </div>
                     </form>
+
                 </div>
             </section>
 

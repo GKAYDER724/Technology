@@ -331,20 +331,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+// 10. Profile Update Form
+const profileForm = document.getElementById('profile-update-form');
 
-    // 10. Profile Update Form
-    const profileForm = document.getElementById('profile-update-form');
-
-    if (profileForm) {
-        profileForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            window.showToast(
-                'Thông tin cá nhân đã được lưu thành công!',
-                'success'
-            );
-        });
-    }
+if (profileForm) {
+    profileForm.addEventListener('submit', function () {
+        // Để Laravel nhận form và cập nhật dữ liệu
+    });
+}
 
 
     // 11. Checkout Order Form
@@ -732,47 +726,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const passwordForm = document.getElementById('profile-password-form');
-
-    if (passwordForm) {
-        passwordForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const currentPassword =
-                document.getElementById('current-password').value;
-
-            const newPassword =
-                document.getElementById('new-password').value;
-
-            const confirmPassword =
-                document.getElementById('confirm-password').value;
-
-            if (!currentPassword || !newPassword || !confirmPassword) {
-                window.showToast('Vui lòng nhập đầy đủ thông tin.', 'danger');
-                return;
-            }
-
-            if (newPassword.length < 6) {
-                window.showToast(
-                    'Mật khẩu mới phải có ít nhất 6 ký tự.',
-                    'danger'
-                );
-                return;
-            }
-
-            if (newPassword !== confirmPassword) {
-                window.showToast(
-                    'Mật khẩu xác nhận không khớp.',
-                    'danger'
-                );
-                return;
-            }
-
-            window.showToast(
-                'Giao diện đã kiểm tra thông tin. Chưa có backend đổi mật khẩu.',
-                'info'
-            );
-        });
-    }
 
     const page = document.querySelector('.et-notification-page');
 

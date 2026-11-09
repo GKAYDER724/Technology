@@ -85,7 +85,7 @@ a {
     min-height: 32px;
     color: #cbd5e1;
     background: #101a30;
-    font-size: 10px;
+    font-size: 13px;
 }
 
 .et-topbar-inner,
@@ -622,7 +622,7 @@ a {
 
 .et-category-inner > a {
     color: #64748b;
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 550;
     white-space: nowrap;
     text-decoration: none;
@@ -673,7 +673,7 @@ a {
 .section-heading h2,
 .trust-heading h2 {
     margin: 0 0 5px;
-    font-size: 19px;
+    font-size: 24px;
     font-weight: 800;
     letter-spacing: -.35px;
 }
@@ -682,12 +682,12 @@ a {
 .trust-heading p {
     margin: 0;
     color: #94a3b8;
-    font-size: 11px;
+    font-size: 13px;
 }
 
 .section-heading > a {
     color: #2563eb;
-    font-size: 11px;
+    font-size: 13px;
     white-space: nowrap;
 }
 
@@ -925,18 +925,18 @@ a {
 
 .category-item strong {
     margin-bottom: 4px;
-    font-size: 11px;
+    font-size: 15px;
 }
 
 .category-item small {
     color: #8490a3;
-    font-size: 9px;
+    font-size: 13px;
 }
 
 .category-item > b {
     margin-top: 7px;
     color: #2563eb;
-    font-size: 10px;
+    font-size: 14px;
 }
 
 /* Existing category component */
@@ -1019,14 +1019,14 @@ a {
 
 .flashsale-title h2 {
     margin: 0;
-    font-size: 19px;
+    font-size: 24px;
     font-weight: 850;
 }
 
 .flashsale-title p {
     margin: 4px 0 0;
     color: rgba(255,255,255,.8);
-    font-size: 10px;
+    font-size: 13px;
 }
 
 .flashsale-today {
@@ -1101,7 +1101,7 @@ a {
     border-radius: 5px;
     background: #f00649;
     color: #fff;
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 800;
 }
 
@@ -1110,21 +1110,21 @@ a {
 }
 
 .sale-content > small {
-    color: #94a3b8;
-    font-size: 9px;
+    color: #011530;
+    font-size: 13px;
 }
 
 .sale-content h3 {
     min-height: 32px;
     margin: 5px 0;
-    font-size: 11px;
+    font-size: 17px;
     line-height: 1.5;
     font-weight: 750;
 }
 
 .sale-price {
     color: #e11d48;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 850;
     white-space: nowrap;
 }
@@ -1132,7 +1132,7 @@ a {
 .sale-price del {
     margin-left: 3px;
     color: #a3aab7;
-    font-size: 9px;
+    font-size: 13px;
     font-weight: 400;
 }
 
@@ -1157,7 +1157,7 @@ a {
     gap: 4px;
     margin-top: 5px;
     color: #9ca3af;
-    font-size: 8px;
+    font-size: 13px;
 }
 
 .stock-label b {
@@ -1180,7 +1180,7 @@ a {
     border-radius: 6px;
     background: #f1f5f9;
     color: #475569;
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 600;
 }
 
@@ -1272,11 +1272,11 @@ a {
     justify-content: space-between;
     gap: 5px;
     margin-bottom: 6px;
-    font-size: 9px;
+    font-size: 13px;
 }
 
 .best-meta span {
-    color: #94a3b8;
+    color: #001028;
 }
 
 .best-meta b {
@@ -1287,7 +1287,7 @@ a {
 .best-content h3 {
     min-height: 35px;
     margin-bottom: 7px;
-    font-size: 11px;
+    font-size: 17px;
     line-height: 1.55;
     font-weight: 750;
 }
@@ -1296,20 +1296,20 @@ a {
     min-height: 30px;
     margin-bottom: 10px;
     color: #8490a3;
-    font-size: 9px;
+    font-size: 13px;
     line-height: 1.6;
 }
 
 .best-price {
     color: #2563eb;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 850;
     white-space: nowrap;
 }
 
 .best-price del {
     color: #9ca3af;
-    font-size: 9px;
+    font-size: 13px;
     font-weight: 400;
 }
 
@@ -1325,7 +1325,7 @@ a {
 
 .best-bottom > span {
     color: #10a779;
-    font-size: 9px;
+    font-size: 13px;
 }
 
 .best-bottom > a {
@@ -1333,7 +1333,7 @@ a {
     border-radius: 6px;
     background: #2563eb;
     color: white;
-    font-size: 9px;
+    font-size: 13px;
     font-weight: 700;
     white-space: nowrap;
 }

@@ -1,16 +1,17 @@
 
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\AccountController;
-use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\WarrantyController;
+use Illuminate\Support\Facades\Route;
 
 // Trang chủ
 Route::get('/', [HomeController::class, 'index']);
@@ -110,4 +111,3 @@ Route::prefix('warranty')
         Route::get('/history', 'history')
             ->name('history');
     });
-

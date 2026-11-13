@@ -1,15 +1,16 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\AccountController;
-use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\WarrantyController;
+use Illuminate\Support\Facades\Route;
 
 //  Trang chủ
 Route::get('/', [HomeController::class, 'index']);
@@ -33,7 +34,6 @@ Route::get('/register', [AuthController::class, 'showRegister'])
 Route::post('/register', [AuthController::class, 'register'])
     ->middleware('throttle:5,1')
     ->name('register.submit');
-
 
 // Đăng xuất
 Route::post('/logout', [AuthController::class, 'logout'])
@@ -91,3 +91,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
 });
+
+Route::get('/categories', [CategoryController::class, 'index']);

@@ -1,6 +1,5 @@
 <?php
 namespace App\Http\Controllers;
-
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -20,7 +19,7 @@ class AccountController
     }
 
     // Cập nhật hồ sơ cá nhân
-    
+
 
 public function update(Request $request)
 {
@@ -38,7 +37,7 @@ public function update(Request $request)
     ]);
 
     // Laravel tự kiểm tra dữ liệu và trả lỗi về form nếu không hợp lệ
-    
+
 $validated = $request->validate([
     'fullname' => [
         'required',

@@ -27,35 +27,64 @@ use Filament\Models\Contracts\HasName;
 ])]
 
 #[Hidden(['password', 'remember_token'])]
+
 class User extends Authenticatable implements FilamentUser, HasName
 {
-        protected $primaryKey = 'user_id';
+    protected $primaryKey = 'user_id';
 
     public $timestamps = false;
-    /** @use HasFactory<UserFactory> */
+/** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
+     /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
 
     public function canAccessPanel(Panel $panel): bool
-{
-    return in_array((int) $this->role_id, [1, 2], true)
-        && $this->status === 'active';
-}
+    {
+        return in_array((int) $this->role_id, [1, 2], true)
+            && $this->status === 'active';
+    }
+
+
     protected function casts(): array
     {
         return [
+<<<<<<< HEAD
 
+=======
+>>>>>>> 84b04b7 (Cập nhật Model và quan hệ Database)
             'password' => 'hashed',
         ];
     }
 
+
     public function getFilamentName(): string
-{
-    return (string) ($this->fullname ?? $this->email ?? 'Admin');
-}
+    {
+        return (string) ($this->fullname ?? $this->email ?? 'Admin');
+    }
+
+
+    // User thuộc 1 Role
+    public function role()
+    {
+        return $this->belongsTo(
+            Role::class,
+            'role_id',
+            'role_id'
+        );
+    }
+
+
+    // User có nhiều Notification
+    public function notifications()
+    {
+        return $this->hasMany(
+            Notification::class,
+            'user_id',
+            'user_id'
+        );
+    }
 }

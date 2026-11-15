@@ -2,82 +2,83 @@
 
 namespace App\Http\Controllers;
 
-use App\Data\MockData;
+use App\Models\Product;
+use App\Models\Category;
+use Illuminate\Http\Request;
 
-class ProductController
+class ProductController extends Controller
 {
-    public function index()
+    // Trang danh sách sản phẩm ngoài Frontend
+    public function index(Request $request)
     {
-        $categories = MockData::getCategories();
-        $products = MockData::getProducts();
-        $cart = MockData::getCart();
-        $cartCount = count($cart['items']);
+        $categories = Category::all();
 
-        // Check search or filter params
-        $search = $_GET['search'] ?? '';
-        $selectedCategory = $_GET['category'] ?? '';
-        $selectedBrand = $_GET['brand'] ?? '';
-        $sort = $_GET['sort'] ?? 'popular';
+        // Lấy các tham số từ request (nếu có)
+        $search = $request->input('search');
+        $selectedCategory = $request->input('category_id');
+        $sort = $request->input('sort', 'popular');
 
-        $filteredProducts = $products;
+        // Query từ bảng products thật trong Database
+        $query = Product::with(['category', 'primaryImage', 'variants'])
+            ->where('status', 'active');
+
+        // Tìm kiếm theo tên
         if ($search) {
-            $filteredProducts = array_filter($filteredProducts, function ($p) use ($search) {
-                return stripos($p['name'], $search) !== false || stripos($p['brand'], $search) !== false;
-            });
-        }
-        if ($selectedCategory) {
-            $filteredProducts = array_filter($filteredProducts, function ($p) use ($selectedCategory) {
-                return $p['category'] === $selectedCategory;
-            });
-        }
-        if ($selectedBrand) {
-            $filteredProducts = array_filter($filteredProducts, function ($p) use ($selectedBrand) {
-                return strcasecmp($p['brand'], $selectedBrand) === 0;
-            });
+            $query->where('name', 'like', '%' . $search . '%');
         }
 
-        if ($sort === 'price_asc') {
-            usort($filteredProducts, fn($a, $b) => $a['price'] <=> $b['price']);
-        } elseif ($sort === 'price_desc') {
-            usort($filteredProducts, fn($a, $b) => $b['price'] <=> $a['price']);
-        } elseif ($sort === 'rating') {
-            usort($filteredProducts, fn($a, $b) => $b['rating'] <=> $a['rating']);
+        // Lọc theo danh mục
+        if ($selectedCategory) {
+            $query->where('category_id', $selectedCategory);
         }
+
+        // Sắp xếp
+        if ($sort === 'price_asc') {
+            $query->orderBy('base_price', 'asc');
+        } elseif ($sort === 'price_desc') {
+            $query->orderBy('base_price', 'desc');
+        } else {
+            $query->latest('product_id'); // Mặc định mới nhất
+        }
+
+        $products = $query->paginate(12)->withQueryString();
+
+        // Tạm thời giả lập giỏ hàng count (hoặc sau này gắn session giỏ hàng sau)
+        $cartCount = 0; 
 
         return view('products.index', [
             'categories' => $categories,
-            'products' => array_values($filteredProducts),
-            'totalCount' => count($filteredProducts),
+            'products' => $products,
+            'totalCount' => $products->total(),
             'search' => $search,
             'selectedCategory' => $selectedCategory,
-            'selectedBrand' => $selectedBrand,
             'sort' => $sort,
             'cartCount' => $cartCount
         ]);
     }
 
+    // Trang chi tiết sản phẩm ngoài Frontend
     public function show($id)
     {
-        $products = MockData::getProducts();
-        $product = null;
-        foreach ($products as $p) {
-            if ($p['id'] == $id) {
-                $product = $p;
-                break;
-            }
-        }
+        // Lấy sản phẩm theo ID kèm theo ảnh thư viện và các biến thể
+        $product = Product::with(['category', 'images', 'variants'])
+            ->where('product_id', $id)
+            ->where('status', 'active')
+            ->firstOrFail();
 
-        if (!$product) {
-            $product = $products[0]; // fallback
-        }
+        // Lấy sản phẩm liên quan cùng danh mục
+        $relatedProducts = Product::with(['primaryImage'])
+            ->where('category_id', $product->category_id)
+            ->where('product_id', '!=', $id)
+            ->where('status', 'active')
+            ->take(4)
+            ->get();
 
-        $relatedProducts = array_filter($products, fn($p) => $p['id'] != $product['id']);
-        $cart = MockData::getCart();
-        $cartCount = count($cart['items']);
+        $cartCount = 0;
 
         return view('products.show', [
             'product' => $product,
-            'relatedProducts' => array_slice(array_values($relatedProducts), 0, 4),
+            'relatedProducts' => $relatedProducts,
             'cartCount' => $cartCount
         ]);
     }

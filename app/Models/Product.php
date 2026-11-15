@@ -10,8 +10,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Product extends Model
 {
     protected $table = 'products';
+
     protected $primaryKey = 'product_id';
-    public $timestamps = false; // Bỏ dòng này nếu bảng có created_at, updated_at
+
+    public $timestamps = true;
 
     protected $fillable = [
         'category_id',
@@ -29,41 +31,66 @@ class Product extends Model
         'stock' => 'integer',
     ];
 
-    // Quan hệ với Danh mục
+
+    // Sản phẩm thuộc danh mục
     public function category(): BelongsTo
     {
-        return $this->belongsTo(Category::class, 'category_id', 'category_id');
+        return $this->belongsTo(
+            Category::class,
+            'category_id',
+            'category_id'
+        );
     }
 
-    // Quan hệ với Thư viện ảnh
+
+    // Danh sách hình ảnh sản phẩm
     public function images(): HasMany
     {
-        return $this->hasMany(ProductImage::class, 'product_id', 'product_id');
+        return $this->hasMany(
+            ProductImage::class,
+            'product_id',
+            'product_id'
+        );
     }
 
-    // Lấy nhanh ảnh đại diện chính (is_primary = 1)
+
+    // Lấy ảnh đại diện chính
     public function primaryImage(): HasOne
     {
-        return $this->hasOne(ProductImage::class, 'product_id', 'product_id')
-            ->where('is_primary', 1);
+        return $this->hasOne(
+            ProductImage::class,
+            'product_id',
+            'product_id'
+        )->where('is_primary', 1);
     }
 
-    // Quan hệ với Các phiên bản biến thể
+
+    // Danh sách biến thể sản phẩm
     public function variants(): HasMany
     {
-        return $this->hasMany(ProductVariant::class, 'product_id', 'product_id');
+        return $this->hasMany(
+            ProductVariant::class,
+            'product_id',
+            'product_id'
+        );
     }
 
-    // Tự động tính lại tổng tồn kho từ các biến thể
+
+    // Đồng bộ tổng tồn kho từ biến thể
     public function syncTotalStock(): void
     {
         if ($this->variants()->exists()) {
+
             $totalStock = $this->variants()->sum('stock');
-            $this->updateQuietly(['stock' => $totalStock]);
+
+            $this->updateQuietly([
+                'stock' => $totalStock
+            ]);
         }
     }
 
-    // Hàm hoàn kho cho sản phẩm không có biến thể
+
+    // Hoàn kho sản phẩm
     public function restoreStock(int $quantity): void
     {
         $this->increment('stock', $quantity);

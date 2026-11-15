@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Product;
 
 class Category extends Model
 {
@@ -23,7 +22,7 @@ class Category extends Model
     protected $fillable = [
         'name',
         'status',
-        'parent_id'
+        'parent_id',
     ];
 
 
@@ -33,7 +32,9 @@ class Category extends Model
     }
 
 
-    // Danh mục cha
+    /**
+     * Danh mục cha
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(
@@ -44,7 +45,9 @@ class Category extends Model
     }
 
 
-    // Danh mục con
+    /**
+     * Danh mục con
+     */
     public function children(): HasMany
     {
         return $this->hasMany(
@@ -55,7 +58,9 @@ class Category extends Model
     }
 
 
-    // Sản phẩm thuộc danh mục
+    /**
+     * Sản phẩm thuộc danh mục
+     */
     public function products(): HasMany
     {
         return $this->hasMany(

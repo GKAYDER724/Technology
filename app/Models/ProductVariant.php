@@ -8,8 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ProductVariant extends Model
 {
     protected $table = 'product_variants';
+
     protected $primaryKey = 'variant_id';
+
     public $timestamps = false;
+
 
     protected $fillable = [
         'product_id',
@@ -20,33 +23,47 @@ class ProductVariant extends Model
         'status',
     ];
 
+
     protected $casts = [
         'price' => 'decimal:2',
         'stock' => 'integer',
     ];
 
+
+    // Biến thể thuộc sản phẩm
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'product_id', 'product_id');
+        return $this->belongsTo(
+            Product::class,
+            'product_id',
+            'product_id'
+        );
     }
 
-    // Tự động đồng bộ tổng tồn kho lên sản phẩm cha mỗi khi biến thể thay đổi
+
+    // Đồng bộ tồn kho sản phẩm cha
     protected static function booted(): void
     {
         static::saved(function (ProductVariant $variant) {
+
             $variant->product?->syncTotalStock();
+
         });
 
+
         static::deleted(function (ProductVariant $variant) {
+
             $variant->product?->syncTotalStock();
+
         });
     }
 
-    // Hàm hoàn kho khi user hủy đơn hàng (VD: $variant->restoreStock(3))
+
+    // Hoàn kho biến thể
     public function restoreStock(int $quantity): void
     {
         $this->increment('stock', $quantity);
-        // Sự kiện 'saved' hoặc gọi trực tiếp syncTotalStock() sẽ tự cộng lại tổng kho sản phẩm cha
+
         $this->product?->syncTotalStock();
     }
 }

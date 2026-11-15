@@ -27,7 +27,11 @@ class Category extends Model
      */
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(Category::class, 'parent_id', 'category_id');
+        return $this->belongsTo(
+            Category::class,
+            'parent_id',
+            'category_id'
+        );
     }
 
     /**
@@ -35,6 +39,21 @@ class Category extends Model
      */
     public function children(): HasMany
     {
-        return $this->hasMany(Category::class, 'parent_id', 'category_id');
+        return $this->hasMany(
+            Category::class,
+            'parent_id',
+            'category_id'
+        );
+    }
+
+
+    // Sản phẩm thuộc danh mục
+    public function products(): HasMany
+    {
+        return $this->hasMany(
+            Product::class,
+            'category_id',
+            'category_id'
+        );
     }
 }

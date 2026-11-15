@@ -15,6 +15,7 @@ class ProductVariant extends Model
 
     protected $guarded = [];
 
+
     protected $casts = [
         'price' => 'decimal:2',
         'sale_price' => 'decimal:2',
@@ -26,6 +27,10 @@ class ProductVariant extends Model
      */
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'product_id', 'product_id');
+        return $this->belongsTo(
+            Product::class,
+            'product_id',
+            'product_id'
+        );
     }
 }

@@ -21,7 +21,11 @@ class Product extends Model
      */
     public function category(): BelongsTo
     {
-        return $this->belongsTo(Category::class, 'category_id', 'category_id');
+        return $this->belongsTo(
+            Category::class,
+            'category_id',
+            'category_id'
+        );
     }
 
     /**
@@ -29,7 +33,11 @@ class Product extends Model
      */
     public function variants(): HasMany
     {
-        return $this->hasMany(ProductVariant::class, 'product_id', 'product_id');
+        return $this->hasMany(
+            ProductVariant::class,
+            'product_id',
+            'product_id'
+        );
     }
 
     /**

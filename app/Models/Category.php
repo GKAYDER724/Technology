@@ -45,15 +45,4 @@ class Category extends Model
             'category_id'
         );
     }
-
-
-    // Sản phẩm thuộc danh mục
-    public function products(): HasMany
-    {
-        return $this->hasMany(
-            Product::class,
-            'category_id',
-            'category_id'
-        );
-    }
 }

@@ -1,3 +1,4 @@
+
 <?php
 
 namespace Database\Seeders;
@@ -78,5 +79,7 @@ class UserSeeder extends Seeder
                 $user
             );
         }
+
+        $this->command->info('Đã hoàn thành UserSeeder.');
     }
 }

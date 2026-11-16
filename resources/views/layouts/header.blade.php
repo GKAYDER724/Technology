@@ -49,82 +49,81 @@
 
             <div class="et-account-wrapper">
 
-    @auth
-        {{-- ĐÃ ĐĂNG NHẬP --}}
-        @php
-            $user = Auth::user();
-        @endphp
+                @auth
+                    {{-- ĐÃ ĐĂNG NHẬP --}}
+                    @php
+                        $user = Auth::user();
+                    @endphp
 
-        <button type="button" class="et-account" id="etAccountToggle"
-            aria-expanded="false" aria-controls="etAccountDropdown">
+                    <button type="button" class="et-account" id="etAccountToggle" aria-expanded="false"
+                        aria-controls="etAccountDropdown">
 
-            <span class="et-avatar">
-                <i class="bi bi-person-fill"></i>
-            </span>
+                        <span class="et-avatar">
+                            <i class="bi bi-person-fill"></i>
+                        </span>
 
-            <span class="et-account-text">
-                <strong>{{ $user->fullname }}</strong>
-                <small>Tech VIP</small>
-            </span>
+                        <span class="et-account-text">
+                            <strong>{{ $user->fullname }}</strong>
+                            <small>Tech VIP</small>
+                        </span>
 
-            <i class="bi bi-chevron-down et-account-chevron"></i>
-        </button>
+                        <i class="bi bi-chevron-down et-account-chevron"></i>
+                    </button>
 
-        <div class="et-account-dropdown" id="etAccountDropdown">
+                    <div class="et-account-dropdown" id="etAccountDropdown">
 
-            <div class="et-dropdown-profile">
-                <strong>{{ $user->fullname }}</strong>
-                <span>{{ $user->email }}</span>
+                        <div class="et-dropdown-profile">
+                            <strong>{{ $user->fullname }}</strong>
+                            <span>{{ $user->email }}</span>
 
-                <div class="et-vip-info">
-                    <span>Tech VIP</span>
-                    <strong>1.250 điểm</strong>
-                </div>
+                            <div class="et-vip-info">
+                                <span>Tech VIP</span>
+                                <strong>1.250 điểm</strong>
+                            </div>
+                        </div>
+                        <div class="et-dropdown-links">
+                            <a href="{{ url('/account/profile') }}">
+                                <i class="bi bi-person"></i>
+                                <span>Thông tin tài khoản</span>
+                            </a>
+
+                            <a href="{{ url('/orders') }}">
+                                <i class="bi bi-box-seam"></i>
+                                <span>Quản lý đơn hàng</span>
+                            </a>
+
+                            <a href="{{ url('/notifications') }}">
+                                <i class="bi bi-bell"></i>
+                                <span>Thông báo</span>
+                            </a>
+                        </div>
+
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit">Đăng xuất</button>
+                        </form>
+
+                    </div>
+                @else
+                    {{-- CHƯA ĐĂNG NHẬP --}}
+                    <div class="et-account">
+                        <span class="et-avatar">
+                            <i class="bi bi-person-fill"></i>
+                        </span>
+
+                        <span class="et-account-text">
+                            <a href="{{ url('/login') }}">
+                                <strong>Đăng nhập</strong>
+                            </a>
+                            <small>
+                                <a href="{{ url('/register') }}">Đăng ký tài khoản</a>
+                            </small>
+                        </span>
+                    </div>
+
+                @endauth
+
             </div>
-<div class="et-dropdown-links">
-                <a href="{{ url('/account/profile') }}">
-                    <i class="bi bi-person"></i>
-                    <span>Thông tin tài khoản</span>
-                </a>
-
-                <a href="{{ url('/orders') }}">
-                    <i class="bi bi-box-seam"></i>
-                    <span>Quản lý đơn hàng</span>
-                </a>
-
-                <a href="{{ url('/notifications') }}">
-                    <i class="bi bi-bell"></i>
-                    <span>Thông báo</span>
-                </a>
-            </div>
-
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit">Đăng xuất</button>
-            </form>
-
-        </div>
-
-    @else
-        {{-- CHƯA ĐĂNG NHẬP --}}
-        <div class="et-account">
-            <span class="et-avatar">
-                <i class="bi bi-person-fill"></i>
-            </span>
-
-            <span class="et-account-text">
-                <a href="{{ url('/login') }}">
-                    <strong>Đăng nhập</strong>
-                </a>
-                <small>
-                    <a href="{{ url('/register') }}">Đăng ký tài khoản</a>
-                </small>
-            </span>
-        </div>
-
-    @endauth
-
-</div>
 
 
         </div>
@@ -134,12 +133,13 @@
     <nav class="et-category-nav">
         <div class="et-container et-category-inner">
             <a href="/products">Tất cả sản phẩm</a>
-            <a href="/products?category=phone">Điện thoại di động</a>
-            <a href="/products?category=laptop">Laptop &amp; Máy tính</a>
-            <a href="/products?category=tablet">Máy tính bảng iPad</a>
-            <a href="/products?category=audio">Tai nghe &amp; Loa</a>
-            <a href="/products?category=smart-home">Đồng hồ thông minh</a>
-            <a href="/products?category=accessory">Phụ kiện công nghệ</a>
+
+            {{-- Chỉ hiển thị tối đa 6 danh mục --}}
+            @foreach ($categories->take(6) as $category)
+                <a href="{{ url('/products?category=' . $category->category_id) }}">
+                    {{ $category->name }}
+                </a>
+            @endforeach
 
             <div class="et-nav-spacer"></div>
 

@@ -13,35 +13,12 @@ class ProductImage extends Model
 
     public $timestamps = false;
 
-<<<<<<< HEAD
-
-    protected $fillable = [
-        'product_id',
-        'image',
-        'is_primary',
-    ];
-
-=======
     protected $guarded = [];
->>>>>>> bc841f2 (Admin_quản lí sản phẩm)
 
     protected $casts = [
         'is_primary' => 'boolean',
     ];
 
-<<<<<<< HEAD
-
-    // Hình ảnh thuộc sản phẩm
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(
-            Product::class,
-            'product_id',
-            'product_id'
-        );
-    }
-}
-=======
     /**
      * Hình ảnh thuộc một sản phẩm.
      */
@@ -50,4 +27,3 @@ class ProductImage extends Model
         return $this->belongsTo(Product::class, 'product_id', 'product_id');
     }
 }
->>>>>>> bc841f2 (Admin_quản lí sản phẩm)

@@ -16,8 +16,11 @@ use App\Http\Controllers\WarrantyController;
 Route::get('/', [HomeController::class, 'index']);
 
 // Danh sách và chi tiết sản phẩm
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{id}', [ProductController::class, 'show']);
+Route::get('/products', [ProductController::class, 'index'])
+    ->name('products.index');
+
+Route::get('/products/{id}', [ProductController::class, 'show'])
+    ->name('products.show');
 
 // Đăng nhập
 Route::get('/login', [AuthController::class, 'showLogin'])

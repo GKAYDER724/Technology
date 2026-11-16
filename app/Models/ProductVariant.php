@@ -13,62 +13,6 @@ class ProductVariant extends Model
 
     public $timestamps = false;
 
-<<<<<<< HEAD
-
-    protected $fillable = [
-        'product_id',
-        'variant_name',
-        'sku',
-        'price',
-        'stock',
-        'status',
-    ];
-
-
-    protected $casts = [
-        'price' => 'decimal:2',
-        'stock' => 'integer',
-    ];
-
-
-    // Biến thể thuộc sản phẩm
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(
-            Product::class,
-            'product_id',
-            'product_id'
-        );
-    }
-
-
-    // Đồng bộ tồn kho sản phẩm cha
-    protected static function booted(): void
-    {
-        static::saved(function (ProductVariant $variant) {
-
-            $variant->product?->syncTotalStock();
-
-        });
-
-
-        static::deleted(function (ProductVariant $variant) {
-
-            $variant->product?->syncTotalStock();
-
-        });
-    }
-
-
-    // Hoàn kho biến thể
-    public function restoreStock(int $quantity): void
-    {
-        $this->increment('stock', $quantity);
-
-        $this->product?->syncTotalStock();
-    }
-}
-=======
     protected $guarded = [];
 
     protected $casts = [
@@ -85,4 +29,3 @@ class ProductVariant extends Model
         return $this->belongsTo(Product::class, 'product_id', 'product_id');
     }
 }
->>>>>>> bc841f2 (Admin_quản lí sản phẩm)

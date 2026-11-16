@@ -71,121 +71,116 @@
             </div>
 
 
-            <div class="category-grid">
+            <div class="category-grid" id="homeCategoryGrid">
                 @foreach ($categories as $category)
-                    <a href="{{ url('/products?category=' . $category->category_id) }}" class="category-item">
+                    <a href="{{ url('/products?category=' . $category->category_id) }}"
+                        class="category-item {{ $loop->iteration > 6 ? 'category-hidden' : '' }}">
 
                         <span class="category-icon">
                             <i class="bi bi-cpu"></i>
                         </span>
 
                         <strong>{{ $category->name }}</strong>
-
                         <small>Khám phá sản phẩm</small>
-
                     </a>
                 @endforeach
             </div>
 
+            @if ($categories->count() > 6)
+                <div class="category-more-wrapper">
+                    <button type="button" id="toggleHomeCategories" class="category-toggle">
+                        Xem thêm <i class="bi bi-chevron-down"></i>
+                    </button>
+                </div>
+            @endif
+
         </section>
+
 
         {{-- FLASH SALE --}}
-        <section class="flashsale-section">
-            <div class="flashsale-heading">
-                <div class="flashsale-title">
-                    <span class="flashsale-icon"><i class="bi bi-fire"></i></span>
-                    <div>
-                        <h2>FLASH SALE GIÁ SỐC</h2>
-                        <p>Cơ hội săn deal công nghệ giảm tới 30%!</p>
+        {{-- FLASH SALE --}}
+        @if (isset($flashSaleProducts) && $flashSaleProducts->count() > 0)
+            <section class="flashsale-section">
+
+                <div class="flashsale-heading">
+                    <div class="flashsale-title">
+                        <span class="flashsale-icon">
+                            <i class="bi bi-fire"></i>
+                        </span>
+
+                        <div>
+                            <h2>FLASH SALE GIÁ SỐC</h2>
+                            <p>Cơ hội săn deal công nghệ giảm tới 30%!</p>
+                        </div>
+
+                        <span class="flashsale-today">ƯU ĐÃI ĐẶC BIỆT</span>
                     </div>
-                    <span class="flashsale-today">CHỈ HÔM NAY</span>
+
+                    <div class="flashsale-count">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                        SẢN PHẨM ĐANG GIẢM GIÁ
+                    </div>
                 </div>
 
-                <div class="flashsale-count">
-                    <i class="bi bi-clock"></i>
-                    Kết thúc trong:
-                    <b>09</b> : <b>41</b> : <b>03</b>
+                <div class="sale-carousel">
+                    <div class="sale-grid" id="saleGrid">
+
+                        @foreach ($flashSaleProducts as $product)
+                            @php
+                                $discount = round(
+                                    (($product->base_price - $product->sale_price) / $product->base_price) * 100,
+                                );
+                            @endphp
+
+                            <article class="sale-card">
+
+                                <div class="sale-image">
+
+                                    <span class="discount-badge">
+                                        -{{ $discount }}%
+                                    </span>
+
+                                    <img src="{{ $product->product_image ? asset('storage/' . $product->product_image) : asset('images/no-image.png') }}"
+                                        alt="{{ $product->name }}" loading="lazy">
+                                </div>
+
+                                <div class="sale-content">
+
+                                    <small>FLASH SALE</small>
+
+                                    <h3>{{ $product->name }}</h3>
+
+                                    <div class="sale-price">
+                                        {{ number_format($product->sale_price, 0, ',', '.') }}₫
+
+                                        <del>
+                                            {{ number_format($product->base_price, 0, ',', '.') }}₫
+                                        </del>
+                                    </div>
+
+                                    <div class="sale-actions">
+
+                                        <a href="{{ url('/products/' . $product->product_id) }}">
+                                            Chi tiết
+                                        </a>
+
+                                        <a href="{{ url('/cart') }}" aria-label="Xem giỏ hàng">
+                                            <i class="bi bi-cart3"></i>
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                            </article>
+                        @endforeach
+
+                    </div>
                 </div>
-            </div>
 
-            <div class="sale-grid">
-                <article class="sale-card">
-                    <div class="sale-image">
-                        <span class="discount-badge">-7%</span>
-                        <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=85"
-                            alt="iPhone 16 Pro Max">
-                    </div>
-                    <div class="sale-content">
-                        <small>APPLE</small>
-                        <h3>iPhone 16 Pro Max 256GB Chính Hãng VN/A</h3>
-                        <div class="sale-price">33.490.000₫ <del>35.990.000₫</del></div>
-                        <div class="sale-stock"><span style="width:72%"></span></div>
-                        <div class="stock-label"><span>Đã bán 72%</span><b>Chỉ còn 24 cái</b></div>
-                        <div class="sale-actions">
-                            <a href="/products/1">Chi tiết</a>
-                            <a href="/cart" aria-label="Thêm vào giỏ hàng"><i class="bi bi-cart3"></i></a>
-                        </div>
-                    </div>
-                </article>
+            </section>
+        @endif
 
-                <article class="sale-card">
-                    <div class="sale-image">
-                        <span class="discount-badge">-18%</span>
-                        <img src="https://images.unsplash.com/photo-1707230492554-7b2e0c2cfdc8?auto=format&fit=crop&w=600&q=85"
-                            alt="Samsung Galaxy S24 Ultra">
-                    </div>
-                    <div class="sale-content">
-                        <small>SAMSUNG</small>
-                        <h3>Samsung Galaxy S24 Ultra 5G 12GB/256GB - AI Phone</h3>
-                        <div class="sale-price">27.990.000₫ <del>33.990.000₫</del></div>
-                        <div class="sale-stock"><span style="width:72%"></span></div>
-                        <div class="stock-label"><span>Đã bán 72%</span><b>Chỉ còn 18 cái</b></div>
-                        <div class="sale-actions">
-                            <a href="/products">Chi tiết</a>
-                            <a href="/cart" aria-label="Thêm vào giỏ hàng"><i class="bi bi-cart3"></i></a>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="sale-card">
-                    <div class="sale-image">
-                        <span class="discount-badge">-20%</span>
-                        <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=600&q=85"
-                            alt="Sony WH-1000XM5">
-                    </div>
-                    <div class="sale-content">
-                        <small>SONY</small>
-                        <h3>Tai nghe Chống Ồn đỉnh cao Sony WH-1000XM5 Hi-Res Audio</h3>
-                        <div class="sale-price">6.990.000₫ <del>8.990.000₫</del></div>
-                        <div class="sale-stock"><span style="width:65%"></span></div>
-                        <div class="stock-label"><span>Đã bán 65%</span><b>Chỉ còn 35 cái</b></div>
-                        <div class="sale-actions">
-                            <a href="/products">Chi tiết</a>
-                            <a href="/cart" aria-label="Thêm vào giỏ hàng"><i class="bi bi-cart3"></i></a>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="sale-card">
-                    <div class="sale-image">
-                        <span class="discount-badge">-15%</span>
-                        <img src="https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=600&q=85"
-                            alt="Logitech MX Master">
-                    </div>
-                    <div class="sale-content">
-                        <small>LOGITECH</small>
-                        <h3>Chuột Không Dây Logitech MX Master 3S For Mac / Windows</h3>
-                        <div class="sale-price">2.190.000₫ <del>2.590.000₫</del></div>
-                        <div class="sale-stock"><span style="width:72%"></span></div>
-                        <div class="stock-label"><span>Đã bán 72%</span><b>Chỉ còn 43 cái</b></div>
-                        <div class="sale-actions">
-                            <a href="/products">Chi tiết</a>
-                            <a href="/cart" aria-label="Thêm vào giỏ hàng"><i class="bi bi-cart3"></i></a>
-                        </div>
-                    </div>
-                </article>
-            </div>
-        </section>
         {{-- BEST SELLERS --}}
         <section class="tech-section">
             <div class="section-heading">
@@ -282,4 +277,78 @@
             </div>
         </section>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryGrid = document.getElementById('homeCategoryGrid');
+            const toggleButton = document.getElementById('toggleHomeCategories');
+
+            if (!categoryGrid || !toggleButton) return;
+
+            // Đảm bảo lúc tải trang luôn ở trạng thái thu gọn
+            categoryGrid.classList.remove('categories-expanded');
+
+            toggleButton.innerHTML =
+                'Xem thêm <i class="bi bi-chevron-down"></i>';
+
+            toggleButton.addEventListener('click', function() {
+                const expanded = categoryGrid.classList.toggle('categories-expanded');
+
+                toggleButton.innerHTML = expanded ?
+                    'Thu gọn <i class="bi bi-chevron-up"></i>' :
+                    'Xem thêm <i class="bi bi-chevron-down"></i>';
+            });
+
+            const grid = document.getElementById('saleGrid');
+
+            if (!grid) return;
+
+            const cards = grid.querySelectorAll('.sale-card');
+
+            // Không chạy slide nếu có tối đa 4 sản phẩm
+            if (cards.length <= 4) return;
+
+            let currentIndex = 0;
+            let interval;
+
+            function getVisibleCards() {
+                if (window.innerWidth <= 576) return 1;
+                if (window.innerWidth <= 992) return 2;
+                return 4;
+            }
+
+            function moveSlide() {
+                const visibleCards = getVisibleCards();
+                const maxIndex = cards.length - visibleCards;
+
+                currentIndex++;
+
+                if (currentIndex > maxIndex) {
+                    currentIndex = 0;
+                }
+
+                const cardWidth = cards[0].offsetWidth;
+                const gap = 20;
+
+                grid.style.transform =
+                    `translateX(-${currentIndex * (cardWidth + gap)}px)`;
+            }
+
+            function startSlide() {
+                clearInterval(interval);
+
+                if (cards.length > getVisibleCards()) {
+                    interval = setInterval(moveSlide, 3000);
+                }
+            }
+
+            window.addEventListener('resize', function() {
+                currentIndex = 0;
+                grid.style.transform = 'translateX(0)';
+                startSlide();
+            });
+
+            startSlide();
+
+        });
+    </script>
 @endsection

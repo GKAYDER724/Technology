@@ -52,10 +52,6 @@ class User extends Authenticatable implements FilamentUser, HasName
     protected function casts(): array
     {
         return [
-<<<<<<< HEAD
-
-=======
->>>>>>> 84b04b7 (Cập nhật Model và quan hệ Database)
             'password' => 'hashed',
         ];
     }

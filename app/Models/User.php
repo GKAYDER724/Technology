@@ -12,6 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Filament\Models\Contracts\HasName;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'role_id',
@@ -33,7 +34,7 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public $timestamps = false;
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * Get the attributes that should be cast.

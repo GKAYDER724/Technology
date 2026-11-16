@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Products\Schemas;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Support\CloudinaryImage;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -15,6 +16,9 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ProductForm
 {
@@ -94,12 +98,46 @@ class ProductForm
                                             FileUpload::make('image')
                                                 ->label('Hình ảnh')
                                                 ->image()
-                                                ->disk('public')
-                                                ->directory('products/gallery')
-                                                ->visibility('public')
+                                                ->disk('cloudinary')
+                                                ->fetchFileInformation(false)
                                                 ->required()
                                                 ->maxSize(5120)
-                                                ->imageEditor(),
+                                                ->imageEditor()
+                                                ->saveUploadedFileUsing(
+                                                    function (TemporaryUploadedFile $file): ?string {
+                                                        $publicId = 'products/gallery/' . Str::uuid();
+
+                                                        $uploaded = Storage::disk('cloudinary')->put(
+                                                            $publicId,
+                                                            $file->get()
+                                                        );
+
+                                                        if (! $uploaded) {
+                                                            throw new \RuntimeException('Không thể tải ảnh lên Cloudinary.');
+                                                        }
+
+                                                        return Storage::disk('cloudinary')->url($publicId);
+                                                    }
+                                                )
+                                                ->getUploadedFileUsing(
+                                                    function (string $file): array {
+                                                        $url = Str::startsWith($file, ['http://', 'https://'])
+                                                            ? $file
+                                                            : Storage::disk('public')->url($file);
+
+                                                        return [
+                                                            'name' => basename(parse_url($file, PHP_URL_PATH) ?: $file),
+                                                            'size' => 0,
+                                                            'type' => null,
+                                                            'url' => $url,
+                                                        ];
+                                                    }
+                                                )
+                                                ->deleteUploadedFileUsing(
+                                                    function (string $file): void {
+                                                        CloudinaryImage::delete($file);
+                                                    }
+                                                ),
 
                                             Checkbox::make('is_primary')
                                                 ->label('Đặt làm ảnh đại diện')
@@ -123,7 +161,7 @@ class ProductForm
                                         ->helperText('Ví dụ: laptop có nhiều lựa chọn RAM hoặc SSD.')
                                         ->default(false)
                                         ->live()
-                                        ->disabled(fn (string $operation): bool => $operation === 'edit')
+                                        ->disabled(fn(string $operation): bool => $operation === 'edit')
                                         ->afterStateHydrated(
                                             function (Toggle $component, ?Product $record): void {
                                                 $component->state(
@@ -139,8 +177,8 @@ class ProductForm
                                                 ->numeric()
                                                 ->minValue(0.01)
                                                 ->prefix('₫')
-                                                ->required(fn (Get $get): bool => ! $get('has_variants'))
-                                                ->visible(fn (Get $get): bool => ! $get('has_variants')),
+                                                ->required(fn(Get $get): bool => ! $get('has_variants'))
+                                                ->visible(fn(Get $get): bool => ! $get('has_variants')),
 
                                             TextInput::make('sale_price')
                                                 ->label('Giá khuyến mãi')
@@ -148,15 +186,15 @@ class ProductForm
                                                 ->minValue(0.01)
                                                 ->prefix('₫')
                                                 ->nullable()
-                                                ->visible(fn (Get $get): bool => ! $get('has_variants')),
+                                                ->visible(fn(Get $get): bool => ! $get('has_variants')),
 
                                             TextInput::make('stock')
                                                 ->label('Số lượng tồn kho')
                                                 ->numeric()
                                                 ->integer()
                                                 ->minValue(0)
-                                                ->required(fn (Get $get): bool => ! $get('has_variants'))
-                                                ->visible(fn (Get $get): bool => ! $get('has_variants'))
+                                                ->required(fn(Get $get): bool => ! $get('has_variants'))
+                                                ->visible(fn(Get $get): bool => ! $get('has_variants'))
                                                 ->columnSpanFull(),
                                         ]),
                                 ]),
@@ -215,20 +253,54 @@ class ProductForm
                                             FileUpload::make('image')
                                                 ->label('Ảnh đại diện biến thể')
                                                 ->image()
-                                                ->disk('public')
-                                                ->directory('products/variants')
-                                                ->visibility('public')
+                                                ->disk('cloudinary')
+                                                ->fetchFileInformation(false)
                                                 ->maxSize(5120)
                                                 ->imageEditor()
+                                                ->saveUploadedFileUsing(
+                                                    function (TemporaryUploadedFile $file): ?string {
+                                                        $publicId = 'products/variants/' . Str::uuid();
+
+                                                        $uploaded = Storage::disk('cloudinary')->put(
+                                                            $publicId,
+                                                            $file->get()
+                                                        );
+
+                                                        if (! $uploaded) {
+                                                            throw new \RuntimeException('Không thể tải ảnh lên Cloudinary.');
+                                                        }
+
+                                                        return Storage::disk('cloudinary')->url($publicId);
+                                                    }
+                                                )
+                                                ->getUploadedFileUsing(
+                                                    function (string $file): array {
+                                                        $url = Str::startsWith($file, ['http://', 'https://'])
+                                                            ? $file
+                                                            : Storage::disk('public')->url($file);
+
+                                                        return [
+                                                            'name' => basename(parse_url($file, PHP_URL_PATH) ?: $file),
+                                                            'size' => 0,
+                                                            'type' => null,
+                                                            'url' => $url,
+                                                        ];
+                                                    }
+                                                )
+                                                ->deleteUploadedFileUsing(
+                                                    function (string $file): void {
+                                                        CloudinaryImage::delete($file);
+                                                    }
+                                                )
                                                 ->columnSpanFull(),
                                         ])
                                         ->columns(2)
                                         ->minItems(1)
                                         ->addActionLabel('Thêm biến thể')
                                         ->reorderableWithButtons()
-                                        ->visible(fn (Get $get): bool => (bool) $get('has_variants')),
+                                        ->visible(fn(Get $get): bool => (bool) $get('has_variants')),
                                 ])
-                                ->visible(fn (Get $get): bool => (bool) $get('has_variants')),
+                                ->visible(fn(Get $get): bool => (bool) $get('has_variants')),
                         ])
                         ->columnSpan(5),
                 ])

@@ -13,6 +13,7 @@ class ProductVariant extends Model
 
     public $timestamps = false;
 
+<<<<<<< HEAD
 
     protected $fillable = [
         'product_id',
@@ -67,3 +68,21 @@ class ProductVariant extends Model
         $this->product?->syncTotalStock();
     }
 }
+=======
+    protected $guarded = [];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+        'sale_price' => 'decimal:2',
+        'stock' => 'integer',
+    ];
+
+    /**
+     * Biến thể thuộc một sản phẩm.
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id', 'product_id');
+    }
+}
+>>>>>>> bc841f2 (Admin_quản lí sản phẩm)

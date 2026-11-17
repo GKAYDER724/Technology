@@ -9743,6 +9743,68 @@ body.pd-review-modal-open {
         transition: none !important;
     }
 }
+/* ==============================
+   Google Login Button
+================================ */
+
+.et-auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 20px 0;
+    color: #9aa3b2;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.et-auth-divider::before,
+.et-auth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e5e9f0;
+}
+
+
+.et-auth-google {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    width: 100%;
+    min-height: 49px;
+
+    border: 1px solid #dfe5ee;
+    border-radius: 10px;
+
+    background: #fff;
+    color: #172033;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition: all .2s ease;
+}
+
+
+.et-auth-google i {
+    font-size: 18px;
+    color: #4285f4;
+}
+
+
+.et-auth-google:hover {
+    border-color: #b8c8e8;
+    background: #f8fbff;
+
+    transform: translateY(-1px);
+
+    box-shadow: 0 8px 18px rgba(24,39,75,.08);
+}
 .warranty-page {
     --w-blue: #1769e0;
     --w-blue-dark: #0e4fb6;

@@ -11,6 +11,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\WarrantyController;
+use App\Http\Controllers\GoogleController;
 use Illuminate\Support\Facades\Route;
 
 // Trang chủ
@@ -30,7 +31,17 @@ Route::get('/login', [AuthController::class, 'showLogin'])
 Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:5,1')
     ->name('login.submit');
-// Đăng ký
+
+
+// ================= GOOGLE LOGIN =================
+
+Route::get('/auth/google', [GoogleController::class, 'redirect'])
+    ->name('google.login');
+
+Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
+
+
+//  Đăng ký
 Route::get('/register', [AuthController::class, 'showRegister'])
     ->name('register');
 

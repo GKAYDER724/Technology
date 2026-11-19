@@ -41,7 +41,8 @@ Route::get('/auth/google', [GoogleController::class, 'redirect'])
 Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
 
 
-//  Đăng ký
+// ================= ĐĂNG KÝ =================
+
 Route::get('/register', [AuthController::class, 'showRegister'])
     ->name('register');
 
@@ -54,6 +55,40 @@ Route::middleware('auth')->group(function () {
 
     // Các chức năng dành cho Customer
     Route::middleware('role:customer')->group(function () {
+        // ================= QUÊN MẬT KHẨU =================
+
+        Route::get('/forgot-password', function () {
+            return view('auth.forgot-password');
+        })->name('password.request');
+
+
+        Route::post('/forgot-password', [AuthController::class, 'sendOtp'])
+            ->name('password.sendOtp');
+
+        Route::get('/reset-password', function () {
+            return view('auth.reset-password');
+        })->name('password.reset');
+
+        Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+            ->name('password.update');
+
+        // ================= NHẬP OTP =================
+
+        Route::get('/verify-otp', function () {
+            return view('auth.verify-otp');
+        })->name('password.verifyOtp');
+
+
+        Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])
+            ->name('password.verifyOtp.submit');
+
+        Route::get('/resend-otp', [AuthController::class, 'resendOtp'])
+            ->name('password.resendOtp');
+        // ================= ĐĂNG XUẤT =================
+
+        Route::post('/logout', [AuthController::class, 'logout'])
+            ->middleware('auth')
+            ->name('logout');
 
         // Giỏ hàng và thanh toán
         Route::get('/cart', [CartController::class, 'index'])
@@ -106,19 +141,15 @@ Route::prefix('warranty')
     ->controller(WarrantyController::class)
     ->group(function () {
 
-        // Warranty overview
         Route::get('/', 'index')
             ->name('index');
 
-        // Create warranty request
         Route::get('/create-request', 'create')
             ->name('create');
 
-        // Check warranty status
         Route::get('/status', 'status')
             ->name('status');
 
-        // Warranty history
         Route::get('/history', 'history')
             ->name('history');
     });

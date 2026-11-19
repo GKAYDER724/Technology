@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -70,7 +71,7 @@ class ProductController extends Controller
                 $children = $categories
                     ->whereIn('parent_id', $parentIds)
                     ->pluck('category_id')
-                    ->map(fn ($id) => (int) $id)
+                    ->map(fn($id) => (int) $id)
                     ->all();
 
                 $children = array_values(array_diff($children, $categoryIds));
@@ -171,9 +172,10 @@ class ProductController extends Controller
     /**
      * Hiển thị chi tiết sản phẩm
      */
+
     public function show($id)
     {
-        // 1. Lấy sản phẩm theo product_id
+        // 1. LẤY THÔNG TIN SẢN PHẨM
         $product = DB::table('products as p')
             ->leftJoin('categories as c', 'p.category_id', '=', 'c.category_id')
             ->where('p.product_id', $id)
@@ -184,40 +186,52 @@ class ProductController extends Controller
             )
             ->first();
 
-        // Không tìm thấy sản phẩm thì trả về 404
+        // Không tìm thấy sản phẩm thì trả về trang 404
         abort_if(!$product, 404);
 
-        // 2. Lấy toàn bộ hình ảnh sản phẩm
+        // 2. LẤY DANH SÁCH ẢNH CỦA SẢN PHẨM
+        // Ảnh chính được đưa lên đầu danh sách
         $productImages = DB::table('product_images')
             ->where('product_id', $product->product_id)
             ->orderByDesc('is_primary')
+            ->orderBy('image_id')
             ->get();
 
-        // 3. Lấy sản phẩm liên quan cùng danh mục
+        // 3. LẤY CÁC PHIÊN BẢN CỦA SẢN PHẨM
+        $variants = DB::table('product_variants')
+            ->where('product_id', $product->product_id)
+            ->where('status', 'active')
+            ->orderBy('variant_id')
+            ->get();
+
+        // 4. LẤY SẢN PHẨM LIÊN QUAN CÙNG DANH MỤC
+        $relatedImages = DB::table('product_images')
+            ->where('is_primary', 1)
+            ->select('product_id', 'image');
+
         $relatedProducts = DB::table('products as p')
-            ->leftJoinSub(
-                DB::table('product_images')
-                    ->where('is_primary', 1)
-                    ->select('product_id', 'image'),
-                'pi',
-                function ($join) {
-                    $join->on('p.product_id', '=', 'pi.product_id');
-                }
-            )
+            ->leftJoinSub($relatedImages, 'pi', function ($join) {
+                $join->on('p.product_id', '=', 'pi.product_id');
+            })
             ->where('p.category_id', $product->category_id)
             ->where('p.product_id', '<>', $product->product_id)
             ->where('p.status', 'active')
             ->select(
-                'p.*',
+                'p.product_id',
+                'p.name',
+                'p.base_price',
+                'p.sale_price',
                 'pi.image as product_image'
             )
             ->orderByDesc('p.product_id')
             ->limit(4)
             ->get();
 
+        // 5. TRUYỀN DỮ LIỆU SANG VIEW
         return view('products.show', compact(
             'product',
             'productImages',
+            'variants',
             'relatedProducts'
         ));
     }

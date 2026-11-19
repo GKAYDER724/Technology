@@ -53,8 +53,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/orders/{id}', [OrderController::class, 'show']);
         Route::get('/orders/{id}/cancel', [OrderController::class, 'cancel']);
 
-        // Đánh giá
-        Route::get('/reviews', [ReviewController::class, 'index']);
+        // Danh sách đánh giá
+        Route::get('/reviews', [ReviewController::class, 'index'])
+            ->name('reviews.index');
+
+        // Gửi đánh giá sản phẩm
+        Route::post('/products/{id}/reviews', [ReviewController::class, 'store'])
+            ->name('products.reviews.store');
     });
 
     // Xem hồ sơ cá nhân
@@ -98,4 +103,3 @@ Route::prefix('warranty')
         Route::get('/history', 'history')
             ->name('history');
     });
-

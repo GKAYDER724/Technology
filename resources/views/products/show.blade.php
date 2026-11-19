@@ -1,83 +1,118 @@
 @extends('layouts.app')
 
-@section('title', 'iPhone 16 Pro Max 256GB | ElectroTech')
+@section('title', ($product->name ?? 'Chi tiết sản phẩm') . ' | ElectroTech')
 
 @section('content')
+
     @php
-        $product = [
-            'brand' => 'APPLE',
-            'sku' => 'PROD-IP16PM',
-            'name' => 'iPhone 16 Pro Max 256GB Chính Hãng VN/A',
-            'price' => 33490000,
-            'old_price' => 35990000,
-            'discount' => 7,
-            'rating' => '4.9',
-            'reviews' => 142,
-            'sold' => 'Đã bán 350+ chiếc',
-        ];
+        /*
+        |--------------------------------------------------------------------------
+        | XỬ LÝ DỮ LIỆU SẢN PHẨM
+        |--------------------------------------------------------------------------
+        */
 
-        $variants = [
-            [
-                'name' => 'Titan Sa Mạc',
-                'color' => '#c8b49a',
-                'price' => 33490000,
-                'stock' => 'Còn 15 máy',
-            ],
-            [
-                'name' => 'Titan Đen',
-                'color' => '#25272b',
-                'price' => 33490000,
-                'stock' => 'Còn 6 máy',
-            ],
-            [
-                'name' => 'Titan Trắng',
-                'color' => '#e8e8ed',
-                'price' => 38990000,
-                'stock' => 'Còn 3 máy',
-            ],
-        ];
+        // Chọn biến thể đầu tiên còn hoạt động nếu sản phẩm có biến thể.
+        $activeVariants = $variants ?? collect();
 
-        $gallery = [
-            'https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?auto=format&fit=crop&w=1000&q=90',
-            'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1000&q=90',
-            'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=1000&q=90',
-        ];
+        $selectedVariant = $activeVariants->first();
 
-        $specifications = [
-            ['Màn hình', 'OLED 6.9" Super Retina XDR Promotion 120Hz'],
-            ['Hệ điều hành', 'iOS 18 (Apple Intelligence)'],
-            ['Vi xử lý', 'Apple A18 Pro (3nm thế hệ 2)'],
-            ['Bộ nhớ trong', '256GB NVMe siêu tốc'],
-            ['Camera sau', 'Chính 48MP + Góc rộng 48MP + Tele 5x 12MP'],
-            ['Camera trước', '12MP TrueDepth 4K HDR'],
-            ['Pin & Sạc', 'Xem video 33 giờ, sạc nhanh 30W, MagSafe 25W'],
-            ['Trọng lượng', '227g'],
-            ['Chính sách bảo hành', 'Bảo hành chính hãng 12 tháng tại các Trung tâm ủy quyền Apple Care VN.'],
-        ];
+        // Giá sản phẩm mặc định.
+        $basePrice = $product->base_price ?? 0;
+        $salePrice = $product->sale_price ?? null;
 
-        $relatedProducts = [
-            [
-                'brand' => 'SAMSUNG',
-                'name' => 'Samsung Galaxy S24 Ultra 5G 12GB/256GB - AI Phone',
-                'price' => 27990000,
-                'image' =>
-                    'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=85',
-            ],
-        ];
+        $sellingPrice = $salePrice !== null && $salePrice > 0 && $salePrice < $basePrice ? $salePrice : $basePrice;
 
-        $formatPrice = fn($price) => number_format($price, 0, ',', '.') . '₫';
+        // Nếu có biến thể thì lấy giá của biến thể đầu tiên.
+        if ($selectedVariant) {
+            $variantPrice = $selectedVariant->price ?? $basePrice;
+            $variantSalePrice = $selectedVariant->sale_price ?? null;
+
+            $sellingPrice =
+                $variantSalePrice !== null && $variantSalePrice > 0 && $variantSalePrice < $variantPrice
+                    ? $variantSalePrice
+                    : $variantPrice;
+
+            $basePrice = $variantPrice;
+            $salePrice = $variantSalePrice;
+        }
+
+        // Tính phần trăm giảm giá.
+        $discount =
+            $salePrice !== null && $salePrice > 0 && $salePrice < $basePrice
+                ? round((($basePrice - $salePrice) / $basePrice) * 100)
+                : 0;
+
+        // Tồn kho mặc định.
+        $stock = $selectedVariant ? (int) $selectedVariant->stock : (int) $product->stock;
+
+        // SKU.
+        $sku = $selectedVariant->sku ?? null;
+
+        // Định dạng giá tiền.
+        $formatPrice = fn($price) => number_format((float) $price, 0, ',', '.') . '₫';
+
+        /*
+        |--------------------------------------------------------------------------
+        | XỬ LÝ HÌNH ẢNH
+        |--------------------------------------------------------------------------
+        */
+
+        // Hỗ trợ cả ảnh Cloudinary và ảnh lưu trong storage.
+        $imageUrl = function ($image) {
+            if (!$image) {
+                return asset('images/no-image.png');
+            }
+
+            if (str_starts_with($image, 'http://') || str_starts_with($image, 'https://')) {
+                return $image;
+            }
+
+            return asset('storage/' . ltrim($image, '/'));
+        };
+
+        // Danh sách ảnh sản phẩm.
+        $gallery = $productImages ?? collect();
+
+        // Ảnh đại diện.
+        $mainImage = $gallery->firstWhere('is_primary', 1) ?? $gallery->first();
+
+        $mainImageUrl = $mainImage ? $imageUrl($mainImage->image) : asset('images/no-image.png');
+
+        // Nếu biến thể có ảnh riêng thì ưu tiên ảnh biến thể.
+        if ($selectedVariant && !empty($selectedVariant->image)) {
+            $mainImageUrl = $imageUrl($selectedVariant->image);
+        }
+
+        // Tên biến thể đang chọn.
+        $selectedVariantName = $selectedVariant ? $selectedVariant->variant_name : 'Mặc định';
+
     @endphp
 
-    <div class="product-detail-page" data-product-name="{{ $product['name'] }}">
+    <div class="product-detail-page" data-product-name="{{ $product->name }}" data-product-id="{{ $product->product_id }}">
 
         {{-- BREADCRUMB --}}
         <nav class="pd-breadcrumb">
+
             <a href="{{ url('/') }}">Trang chủ</a>
+
             <i class="bi bi-chevron-right"></i>
-            <a href="{{ url('/products') }}">PHONE</a>
+
+            <a href="{{ url('/products') }}">Sản phẩm</a>
+
             <i class="bi bi-chevron-right"></i>
-            <span>{{ $product['name'] }}</span>
+
+            @if (!empty($product->category_name))
+                <a href="{{ url('/products?category=' . $product->category_id) }}">
+                    {{ $product->category_name }}
+                </a>
+
+                <i class="bi bi-chevron-right"></i>
+            @endif
+
+            <span>{{ $product->name }}</span>
+
         </nav>
+
 
         {{-- PRODUCT OVERVIEW --}}
         <section class="pd-main-card">
@@ -86,23 +121,46 @@
             <div class="pd-gallery">
 
                 <div class="pd-main-image">
-                    <span class="pd-discount">
-                        Giảm {{ $product['discount'] }}%
-                    </span>
 
-                    <img id="pdMainImage" src="{{ $gallery[0] }}" alt="{{ $product['name'] }}">
+                    @if ($discount > 0)
+                        <span class="pd-discount">
+                            Giảm {{ $discount }}%
+                        </span>
+                    @endif
+
+                    <img id="pdMainImage" src="{{ $mainImageUrl }}" alt="{{ $product->name }}">
+
                 </div>
 
+
+                {{-- PRODUCT THUMBNAILS --}}
                 <div class="pd-thumbnails">
-                    @foreach ($gallery as $index => $image)
-                        <button type="button" class="pd-thumbnail {{ $index === 0 ? 'active' : '' }}"
-                            data-image="{{ $image }}" aria-label="Xem ảnh sản phẩm {{ $index + 1 }}">
-                            <img src="{{ $image }}" alt="Ảnh {{ $index + 1 }}">
+
+                    @if ($gallery->isNotEmpty())
+
+                        @foreach ($gallery as $index => $image)
+                            <button type="button"
+                                class="pd-thumbnail {{ $image->image === ($mainImage->image ?? null) ? 'active' : '' }}"
+                                data-image="{{ $imageUrl($image->image) }}"
+                                aria-label="Xem ảnh sản phẩm {{ $index + 1 }}">
+
+                                <img src="{{ $imageUrl($image->image) }}"
+                                    alt="{{ $product->name }} - Ảnh {{ $index + 1 }}">
+
+                            </button>
+                        @endforeach
+                    @else
+                        <button type="button" class="pd-thumbnail active">
+                            <img src="{{ asset('images/no-image.png') }}" alt="{{ $product->name }}">
                         </button>
-                    @endforeach
+
+                    @endif
+
                 </div>
+
 
                 <div class="pd-gallery-bottom">
+
                     <button type="button" id="pdShare">
                         <i class="bi bi-share"></i>
                         Chia sẻ sản phẩm
@@ -112,155 +170,279 @@
                         <i class="bi bi-heart"></i>
                         Yêu thích
                     </button>
+
                 </div>
 
             </div>
+
 
             {{-- RIGHT: PRODUCT INFORMATION --}}
             <div class="pd-information">
 
+                {{-- BRAND / SKU --}}
                 <div class="pd-product-meta">
-                    <span class="pd-brand">{{ $product['brand'] }}</span>
+
+                    <span class="pd-brand">
+                        {{ $product->category_name ?? 'ELECTROTECH' }}
+                    </span>
+
                     <span class="pd-meta-divider">|</span>
-                    <span>Mã SP: {{ $product['sku'] }}</span>
+
+                    <span>
+                        Mã SP:
+                        <span id="pdSku">
+                            {{ $sku ?? 'Đang cập nhật' }}
+                        </span>
+                    </span>
+
                 </div>
 
-                <h1 class="pd-product-title">{{ $product['name'] }}</h1>
 
+                {{-- PRODUCT NAME --}}
+                <h1 class="pd-product-title">
+                    {{ $product->name }}
+                </h1>
+
+
+                {{-- RATING --}}
                 <div class="pd-rating-row">
+
                     <span class="pd-rating">
-                        <i class="bi bi-star-fill"></i>
-                        {{ $product['rating'] }}
+                        <i class="bi bi-star"></i>
+                        Chưa có đánh giá
                     </span>
 
                     <a href="#pd-reviews" class="pd-review-count">
-                        {{ $product['reviews'] }} đánh giá từ khách hàng
+                        Xem đánh giá sản phẩm
                     </a>
 
-                    <span class="pd-sold">{{ $product['sold'] }}</span>
                 </div>
+
 
                 {{-- PRICE --}}
                 <div class="pd-price-box">
+
                     <strong id="pdPrice">
-                        {{ $formatPrice($product['price']) }}
+                        {{ $formatPrice($sellingPrice) }}
                     </strong>
 
-                    <del id="pdOldPrice">
-                        {{ $formatPrice($product['old_price']) }}
-                    </del>
+                    @if ($discount > 0)
+                        <del id="pdOldPrice">
+                            {{ $formatPrice($basePrice) }}
+                        </del>
 
-                    <span class="pd-saving">
-                        Tiết kiệm {{ $formatPrice($product['old_price'] - $product['price']) }}
-                    </span>
+                        <span class="pd-saving">
+                            Tiết kiệm
+                            {{ $formatPrice($basePrice - $sellingPrice) }}
+                        </span>
+                    @else
+                        <del id="pdOldPrice" style="display:none;"></del>
+
+                        <span class="pd-saving" style="display:none;"></span>
+                    @endif
+
                 </div>
 
-                {{-- COLOR / VARIANT --}}
+
+                {{-- VARIANTS --}}
                 <div class="pd-variant-heading">
+
                     <span>Chọn phiên bản / Màu sắc:</span>
+
                     <strong id="pdSelectedVariant">
-                        256GB - Titan Sa Mạc
+                        {{ $selectedVariantName }}
                     </strong>
+
                 </div>
+
 
                 <div class="pd-variants">
-                    @foreach ($variants as $index => $variant)
-                        <button type="button" class="pd-variant {{ $index === 0 ? 'active' : '' }}"
-                            data-name="{{ $variant['name'] }}" data-price="{{ $variant['price'] }}"
-                            data-stock="{{ $variant['stock'] }}" data-color="{{ $variant['color'] }}">
+
+                    @forelse ($activeVariants as $index => $variant)
+                        @php
+                            $variantBasePrice = (float) ($variant->price ?? 0);
+                            $variantSalePrice = $variant->sale_price ?? null;
+
+                            $variantSellingPrice =
+                                $variantSalePrice !== null &&
+                                $variantSalePrice > 0 &&
+                                $variantSalePrice < $variantBasePrice
+                                    ? $variantSalePrice
+                                    : $variantBasePrice;
+
+                            $variantDiscount =
+                                $variantSalePrice !== null &&
+                                $variantSalePrice > 0 &&
+                                $variantSalePrice < $variantBasePrice
+                                    ? round((($variantBasePrice - $variantSalePrice) / $variantBasePrice) * 100)
+                                    : 0;
+
+                            $variantImage = !empty($variant->image) ? $imageUrl($variant->image) : $mainImageUrl;
+                        @endphp
+
+                        <button type="button"
+                            class="pd-variant {{ $selectedVariant && $selectedVariant->variant_id == $variant->variant_id ? 'active' : '' }}"
+                            data-variant-id="{{ $variant->variant_id }}" data-name="{{ $variant->variant_name }}"
+                            data-price="{{ $variantSellingPrice }}"
+                            data-old-price="{{ $variantDiscount > 0 ? $variantBasePrice : '' }}"
+                            data-discount="{{ $variantDiscount }}" data-stock="{{ $variant->stock }}"
+                            data-sku="{{ $variant->sku }}" data-image="{{ $variantImage }}">
+
                             <span class="pd-variant-name">
-                                <span class="pd-color-dot" style="--variant-color: {{ $variant['color'] }}"></span>
-                                {{ $variant['name'] }}
+
+                                <span class="pd-color-dot" style="--variant-color: #d1d5db">
+                                </span>
+
+                                {{ $variant->variant_name }}
+
                             </span>
 
-                            <strong>{{ $formatPrice($variant['price']) }}</strong>
-                            <small>{{ $variant['stock'] }}</small>
+                            <strong>
+                                {{ $formatPrice($variantSellingPrice) }}
+                            </strong>
+
+                            <small>
+                                @if ($variant->stock > 0)
+                                    Còn {{ $variant->stock }} sản phẩm
+                                @else
+                                    Hết hàng
+                                @endif
+                            </small>
+
                         </button>
-                    @endforeach
+
+                    @empty
+
+                        <p>Sản phẩm hiện chưa có phiên bản.</p>
+                    @endforelse
+
                 </div>
+
 
                 {{-- STOCK --}}
                 <div class="pd-stock-row">
+
                     <span>Tình trạng tồn kho:</span>
 
                     <span class="pd-stock-badge" id="pdStock">
-                        <i class="bi bi-box-seam"></i>
-                        Còn hàng (15 sản phẩm sẵn sàng giao ngay)
+
+                        @if ($stock > 0)
+                            <i class="bi bi-box-seam"></i>
+
+                            Còn hàng ({{ $stock }} sản phẩm sẵn sàng giao ngay)
+                        @else
+                            <i class="bi bi-x-circle"></i>
+
+                            Hết hàng
+                        @endif
+
                     </span>
+
                 </div>
+
 
                 {{-- PROMOTION --}}
                 <div class="pd-promotion">
+
                     <div class="pd-promotion-title">
                         <i class="bi bi-stars"></i>
-                        Khuyến mãi đặc quyền khi mua hôm nay:
+                        Thông tin ưu đãi:
                     </div>
 
                     <ul>
                         <li>
-                            Nhập mã <strong>TECH500</strong> giảm thêm
-                            500.000đ cho đơn hàng từ 5.000.000đ
+                            Sản phẩm chính hãng, có nguồn gốc rõ ràng.
                         </li>
+
                         <li>
-                            Tặng gói bảo hành rơi vỡ VIP 6 tháng độc quyền tại ElectroTech
+                            Hỗ trợ tư vấn và hướng dẫn sử dụng sản phẩm.
                         </li>
+
                         <li>
-                            Hỗ trợ chuyển đổi dữ liệu miễn phí tại quầy và giao nhanh 2h
+                            Chính sách bảo hành theo quy định của cửa hàng.
                         </li>
                     </ul>
+
                 </div>
+
 
                 {{-- QUANTITY --}}
                 <div class="pd-quantity-row">
+
                     <span>Số lượng:</span>
 
                     <div class="pd-quantity-control">
-                        <button type="button" id="pdDecrease" aria-label="Giảm số lượng">-</button>
-                        <input type="number" id="pdQuantity" value="1" min="1" max="15" readonly>
-                        <button type="button" id="pdIncrease" aria-label="Tăng số lượng">+</button>
+
+                        <button type="button" id="pdDecrease" aria-label="Giảm số lượng">
+                            -
+                        </button>
+
+                        <input type="number" id="pdQuantity" value="1" min="1" max="{{ max(1, $stock) }}"
+                            readonly>
+
+                        <button type="button" id="pdIncrease" aria-label="Tăng số lượng">
+                            +
+                        </button>
+
                     </div>
+
                 </div>
+
 
                 {{-- ACTIONS --}}
                 <div class="pd-action-buttons">
-                    <button type="button" class="pd-add-cart" id="pdAddCart">
+
+                    <button type="button" class="pd-add-cart" id="pdAddCart" {{ $stock <= 0 ? 'disabled' : '' }}>
+
                         <i class="bi bi-cart3"></i>
+
                         Thêm Vào Giỏ Hàng
+
                     </button>
 
-                    <button type="button" class="pd-buy-now" id="pdBuyNow">
+                    <button type="button" class="pd-buy-now" id="pdBuyNow" {{ $stock <= 0 ? 'disabled' : '' }}>
+
                         <i class="bi bi-lightning-charge"></i>
+
                         Mua Ngay Giao Tận Nơi
+
                     </button>
+
                 </div>
+
 
                 {{-- POLICIES --}}
                 <div class="pd-policies">
+
                     <div>
                         <i class="bi bi-shield-check"></i>
-                        <span>Bảo hành chính hãng 12 tháng</span>
+                        <span>Bảo hành theo chính sách sản phẩm</span>
                     </div>
 
                     <div>
                         <i class="bi bi-arrow-repeat"></i>
-                        <span>Lỗi 1 đổi 1 trong 30 ngày</span>
+                        <span>Hỗ trợ đổi trả theo quy định</span>
                     </div>
 
                     <div>
                         <i class="bi bi-truck"></i>
-                        <span>Giao hàng miễn phí toàn quốc</span>
+                        <span>Hỗ trợ giao hàng</span>
                     </div>
+
                 </div>
 
             </div>
+
         </section>
+
 
         {{-- SPECIFICATIONS / DESCRIPTION / REVIEWS --}}
         <section class="pd-details-card" id="pd-details">
 
             <div class="pd-detail-tabs" role="tablist">
+
                 <button type="button" class="pd-detail-tab active" data-tab="specifications">
-                    Thông Số Kỹ Thuật
+                    Thông Tin Sản Phẩm
                 </button>
 
                 <button type="button" class="pd-detail-tab" data-tab="description">
@@ -268,123 +450,227 @@
                 </button>
 
                 <button type="button" class="pd-detail-tab" data-tab="reviews" id="pd-reviews">
+
                     Đánh Giá &amp; Nhận Xét
-                    <span class="pd-review-number">2</span>
+
+                    <span class="pd-review-number">0</span>
+
                 </button>
+
             </div>
 
-            {{-- TAB 1 --}}
+
+            {{-- TAB 1: PRODUCT INFORMATION --}}
             <div class="pd-tab-content active" id="pdTabSpecifications">
 
                 <h2 class="pd-spec-title">
+
                     <i class="bi bi-cpu"></i>
-                    Bảng thông số kỹ thuật tiêu chuẩn
+
+                    Thông tin sản phẩm
+
                 </h2>
 
                 <div class="pd-spec-table">
-                    @foreach ($specifications as $spec)
-                        <div class="pd-spec-row">
-                            <div>{{ $spec[0] }}</div>
-                            <div>{{ $spec[1] }}</div>
+
+                    <div class="pd-spec-row">
+                        <div>Tên sản phẩm</div>
+                        <div>{{ $product->name }}</div>
+                    </div>
+
+                    <div class="pd-spec-row">
+                        <div>Danh mục</div>
+                        <div>{{ $product->category_name ?? 'Chưa phân loại' }}</div>
+                    </div>
+
+                    <div class="pd-spec-row">
+                        <div>Mã sản phẩm</div>
+                        <div>{{ $product->product_id }}</div>
+                    </div>
+
+                    <div class="pd-spec-row">
+                        <div>Giá niêm yết</div>
+                        <div>{{ $formatPrice($product->base_price) }}</div>
+                    </div>
+
+                    <div class="pd-spec-row">
+                        <div>Giá khuyến mãi</div>
+                        <div>
+                            @if ($product->sale_price && $product->sale_price > 0)
+                                {{ $formatPrice($product->sale_price) }}
+                            @else
+                                Không có
+                            @endif
                         </div>
-                    @endforeach
+                    </div>
+
+                    <div class="pd-spec-row">
+                        <div>Tồn kho sản phẩm</div>
+                        <div>{{ $product->stock }}</div>
+                    </div>
+
+                    <div class="pd-spec-row">
+                        <div>Trạng thái</div>
+                        <div>
+                            {{ $product->status === 'active' ? 'Đang kinh doanh' : 'Ngừng kinh doanh' }}
+                        </div>
+                    </div>
+
+                    @if ($selectedVariant)
+                        <div class="pd-spec-row">
+                            <div>Phiên bản</div>
+                            <div>{{ $selectedVariant->variant_name }}</div>
+                        </div>
+
+                        <div class="pd-spec-row">
+                            <div>SKU</div>
+                            <div>{{ $selectedVariant->sku }}</div>
+                        </div>
+                    @endif
+
                 </div>
 
             </div>
 
-            {{-- TAB 2 --}}
+
+            {{-- TAB 2: DESCRIPTION --}}
             <div class="pd-tab-content" id="pdTabDescription">
 
                 <h2 class="pd-spec-title">
+
                     <i class="bi bi-file-text"></i>
+
                     Mô tả chi tiết sản phẩm
+
                 </h2>
 
                 <div class="pd-description">
-                    <h3>iPhone 16 Pro Max 256GB Chính Hãng VN/A</h3>
 
-                    <p>
-                        Sở hữu thiết kế cao cấp, màn hình Super Retina XDR
-                        cùng hiệu năng mạnh mẽ, iPhone 16 Pro Max đáp ứng
-                        nhu cầu làm việc, giải trí và sáng tạo nội dung.
-                    </p>
+                    @if (!empty($product->description))
+                        {!! $product->description !!}
+                    @else
+                        <p>Sản phẩm chưa có mô tả chi tiết.</p>
+                    @endif
 
-                    <p>
-                        Sản phẩm có hệ thống camera tiên tiến, dung lượng
-                        lưu trữ 256GB và chính sách bảo hành chính hãng.
-                    </p>
                 </div>
 
             </div>
 
-            {{-- TAB 3 --}}
+
+            {{-- TAB 3: REVIEWS --}}
             <div class="pd-tab-content" id="pdTabReviews">
 
                 <h2 class="pd-spec-title">
+
                     <i class="bi bi-star"></i>
+
                     Đánh giá từ khách hàng
+
                 </h2>
 
 
                 <div class="pd-review-summary">
-                    <strong>4.9/5</strong>
+
+                    <strong>0/5</strong>
 
                     <div class="pd-review-summary-info">
-                        <div class="pd-review-stars">★★★★★</div>
-                        <p>Dựa trên {{ $product['reviews'] }} đánh giá từ khách hàng</p>
+
+                        <div class="pd-review-stars">
+                            ☆☆☆☆☆
+                        </div>
+
+                        <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+
                     </div>
 
-                    <button type="button" class="pd-open-review-modal" id="pdOpenReviewModal">
-                        <i class="bi bi-chat-square-text"></i>
-                        Viết đánh giá sản phẩm
-                    </button>
+                    @auth
+                        {{-- ĐÃ ĐĂNG NHẬP: ĐƯỢC PHÉP ĐÁNH GIÁ --}}
+                        <button type="button" class="pd-open-review-modal" id="pdOpenReviewModal">
+
+                            <i class="bi bi-chat-square-text"></i>
+
+                            Viết đánh giá sản phẩm
+
+                        </button>
+                    @else
+                        {{-- CHƯA ĐĂNG NHẬP: YÊU CẦU ĐĂNG NHẬP --}}
+                        <button type="button" class="pd-open-review-modal" onclick="requireLoginToReview()">
+
+                            <i class="bi bi-chat-square-text"></i>
+
+                            Viết đánh giá sản phẩm
+
+                        </button>
+                    @endauth
+
                 </div>
 
 
                 <div class="pd-review-item">
-                    <div class="pd-review-avatar">A</div>
-                    <div>
-                        <strong>Nguyễn Minh Anh</strong>
-                        <div class="pd-review-stars">★★★★★</div>
-                        <p>Sản phẩm đẹp, đóng gói cẩn thận, giao hàng nhanh.</p>
-                    </div>
-                </div>
 
-                <div class="pd-review-item">
-                    <div class="pd-review-avatar">H</div>
                     <div>
-                        <strong>Trần Hoàng</strong>
-                        <div class="pd-review-stars">★★★★★</div>
-                        <p>Máy hoạt động tốt, ngoại hình đẹp, đúng mô tả.</p>
+                        <strong>Chưa có đánh giá</strong>
+
+                        <p>
+                            Hãy là người đầu tiên chia sẻ trải nghiệm
+                            của bạn về sản phẩm này.
+                        </p>
                     </div>
+
                 </div>
 
             </div>
 
         </section>
 
+
         {{-- RELATED PRODUCTS --}}
         <section class="pd-related-section">
 
-            <h2>Sản phẩm cùng phân khúc liên quan</h2>
+            <h2>Sản phẩm liên quan</h2>
 
             <div class="pd-related-grid">
-                @foreach ($relatedProducts as $related)
-                    <a href="{{ url('/products') }}" class="pd-related-card">
+
+                @forelse ($relatedProducts as $related)
+                    @php
+                        $relatedBasePrice = $related->base_price ?? 0;
+
+                        $relatedSalePrice = $related->sale_price ?? null;
+
+                        $relatedSellingPrice =
+                            $relatedSalePrice !== null && $relatedSalePrice > 0 && $relatedSalePrice < $relatedBasePrice
+                                ? $relatedSalePrice
+                                : $relatedBasePrice;
+                    @endphp
+
+                    <a href="{{ route('products.show', $related->product_id) }}" class="pd-related-card">
 
                         <div class="pd-related-image">
-                            <img src="{{ $related['image'] }}" alt="{{ $related['name'] }}">
+
+                            <img src="{{ !empty($related->product_image) ? $imageUrl($related->product_image) : asset('images/no-image.png') }}"
+                                alt="{{ $related->name }}">
+
                         </div>
 
                         <div class="pd-related-info">
-                            <span>{{ $related['brand'] }}</span>
-                            <h3>{{ $related['name'] }}</h3>
 
-                            <strong>{{ $formatPrice($related['price']) }}</strong>
+                            <span>ElectroTech</span>
+
+                            <h3>{{ $related->name }}</h3>
+
+                            <strong>
+                                {{ $formatPrice($relatedSellingPrice) }}
+                            </strong>
+
                         </div>
 
                     </a>
-                @endforeach
+
+                @empty
+
+                    <p>Chưa có sản phẩm liên quan.</p>
+                @endforelse
+
             </div>
 
         </section>
@@ -394,53 +680,74 @@
 
     {{-- REVIEW MODAL --}}
     <div class="pd-review-modal" id="pdReviewModal" aria-hidden="true">
-        <div class="pd-review-overlay" data-close-review></div> 
+
+        <div class="pd-review-overlay" data-close-review></div>
 
         <div class="pd-review-dialog" role="dialog" aria-modal="true" aria-labelledby="pdReviewModalTitle">
 
             <div class="pd-review-modal-header">
+
                 <div>
+
                     <span class="pd-review-modal-eyebrow">
                         ELECTROTECH CUSTOMER REVIEW
                     </span>
 
-                    <h2 id="pdReviewModalTitle">Viết đánh giá sản phẩm</h2>
+                    <h2 id="pdReviewModalTitle">
+                        Viết đánh giá sản phẩm
+                    </h2>
 
-                    <p>Chia sẻ trải nghiệm của bạn để giúp khách hàng khác.</p>
+                    <p>
+                        Chia sẻ trải nghiệm của bạn để giúp khách hàng khác.
+                    </p>
+
                 </div>
 
                 <button type="button" class="pd-review-close" id="pdCloseReviewModal"
                     aria-label="Đóng cửa sổ đánh giá">
+
                     <i class="bi bi-x-lg"></i>
+
                 </button>
+
             </div>
 
+
             <form id="pdReviewForm">
+
                 @csrf
 
-                {{-- SẢN PHẨM --}}
+                {{-- PRODUCT --}}
                 <div class="pd-review-product">
-                    <img id="pdReviewProductImage" src="{{ $gallery[0] }}" alt="{{ $product['name'] }}">
+
+                    <img id="pdReviewProductImage" src="{{ $mainImageUrl }}" alt="{{ $product->name }}">
 
                     <div class="pd-review-product-info">
+
                         <span class="pd-review-product-label">
                             SẢN PHẨM ĐANG ĐÁNH GIÁ
                         </span>
 
-                        <h3>{{ $product['name'] }}</h3>
+                        <h3>{{ $product->name }}</h3>
 
-                        <p id="pdReviewVariant">256GB - Titan Sa Mạc</p>
+                        <p id="pdReviewVariant">
+                            {{ $selectedVariantName }}
+                        </p>
 
                         <strong id="pdReviewProductPrice">
-                            {{ $formatPrice($product['price']) }}
+                            {{ $formatPrice($sellingPrice) }}
                         </strong>
+
                     </div>
 
                     <i class="bi bi-patch-check-fill pd-review-verified-icon"></i>
+
                 </div>
 
-                {{-- CHỌN SỐ SAO --}}
+
+                {{-- STAR RATING --}}
                 <div class="pd-review-field">
+
                     <label class="pd-review-label">
                         Mức độ hài lòng <span>*</span>
                     </label>
@@ -452,9 +759,12 @@
                             <button type="button" class="pd-review-star {{ $star <= 5 ? 'active' : '' }}"
                                 data-star="{{ $star }}" aria-label="{{ $star }} sao"
                                 aria-pressed="{{ $star === 5 ? 'true' : 'false' }}">
+
                                 <i class="bi bi-star-fill"></i>
+
                             </button>
                         @endfor
+
                     </div>
 
                     <div class="pd-review-rating-caption" id="pdReviewRatingCaption">
@@ -464,51 +774,83 @@
                     <input type="hidden" name="rating" id="pdReviewRating" value="5">
 
                     <p class="pd-review-error" id="pdReviewRatingError"></p>
+
                 </div>
 
-                {{-- TIÊU ĐỀ --}}
+
+                {{-- TITLE --}}
                 <div class="pd-review-field">
+
                     <label for="pdReviewTitle" class="pd-review-label">
+
                         Tiêu đề đánh giá <span>*</span>
+
                     </label>
 
                     <input type="text" name="title" id="pdReviewTitle" maxlength="100"
                         placeholder="Ví dụ: Sản phẩm tốt, đáng mua..." required>
 
                     <div class="pd-review-input-footer">
+
                         <span class="pd-review-error" id="pdReviewTitleError"></span>
-                        <span><span id="pdReviewTitleCount">0</span>/100</span>
+
+                        <span>
+                            <span id="pdReviewTitleCount">0</span>/100
+                        </span>
+
                     </div>
+
                 </div>
 
-                {{-- NỘI DUNG --}}
+
+                {{-- CONTENT --}}
                 <div class="pd-review-field">
+
                     <label for="pdReviewContent" class="pd-review-label">
+
                         Nội dung nhận xét <span>*</span>
+
                     </label>
 
                     <textarea name="content" id="pdReviewContent" rows="4" minlength="10" maxlength="1500"
-                        placeholder="Chất lượng sản phẩm, thiết kế, hiệu năng, trải nghiệm sử dụng..." required></textarea>
+                        placeholder="Chia sẻ trải nghiệm sử dụng sản phẩm..." required></textarea>
 
                     <div class="pd-review-input-footer">
+
                         <span class="pd-review-error" id="pdReviewContentError"></span>
-                        <span><span id="pdReviewContentCount">0</span>/1500</span>
+
+                        <span>
+                            <span id="pdReviewContentCount">0</span>/1500
+                        </span>
+
                     </div>
+
                 </div>
 
-                {{-- ẢNH MINH CHỨNG --}}
+
+                {{-- IMAGES --}}
                 <div class="pd-review-field">
+
                     <label class="pd-review-label">
+
                         Hình ảnh thực tế
-                        <span class="pd-review-optional">(Tùy chọn)</span>
+
+                        <span class="pd-review-optional">
+                            (Tùy chọn)
+                        </span>
+
                     </label>
 
                     <label for="pdReviewImages" class="pd-review-upload">
+
                         <i class="bi bi-cloud-arrow-up"></i>
 
                         <strong>Nhấn để tải ảnh lên</strong>
 
-                        <span>PNG, JPG, WEBP · Tối đa 5 ảnh, mỗi ảnh 5MB</span>
+                        <span>
+                            PNG, JPG, WEBP · Tối đa 5 ảnh, mỗi ảnh 5MB
+                        </span>
+
                     </label>
 
                     <input type="file" id="pdReviewImages" name="images[]" accept="image/png,image/jpeg,image/webp"
@@ -517,42 +859,321 @@
                     <div class="pd-review-image-preview" id="pdReviewImagePreview"></div>
 
                     <p class="pd-review-error" id="pdReviewImagesError"></p>
+
                 </div>
 
-                {{-- XÁC NHẬN --}}
+
+                {{-- CONFIRM --}}
                 <label class="pd-review-confirm">
+
                     <input type="checkbox" name="confirmed_purchase" id="pdReviewConfirmed">
 
                     <span>
                         Tôi xác nhận đánh giá dựa trên trải nghiệm thực tế
                         với sản phẩm và đồng ý với
                         <a href="{{ url('/privacy-policy') }}" target="_blank">
+
                             chính sách đánh giá
+
                         </a>
                         của ElectroTech.
                     </span>
+
                 </label>
 
                 <p class="pd-review-error" id="pdReviewConfirmError"></p>
 
+
                 <div class="pd-review-modal-footer">
+
                     <button type="button" class="pd-review-cancel" data-close-review>
+
                         Hủy bỏ
+
                     </button>
 
                     <button type="submit" class="pd-review-submit">
+
                         <i class="bi bi-send-fill"></i>
+
                         Gửi đánh giá
+
                     </button>
+
                 </div>
+
             </form>
+
         </div>
+
     </div>
 
+    @guest
+        <script>
+            function requireLoginToReview() {
+                const confirmLogin = confirm(
+                    'Bạn cần đăng nhập tài khoản để viết đánh giá sản phẩm. Bạn có muốn đăng nhập ngay không?'
+                );
 
-    {{-- INTERACTIONS --}}
-
+                if (confirmLogin) {
+                    window.location.href = "{{ route('login') }}";
+                }
+            }
+        </script>
+    @endguest
     {{-- PRODUCT DETAIL JAVASCRIPT --}}
     <script src="{{ asset('js/product-detail.js') }}" defer></script>
-@endsection
 
+
+    {{-- VARIANT / GALLERY / QUANTITY --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            /*
+            |--------------------------------------------------------------------------
+            | CHỌN BIẾN THỂ
+            |--------------------------------------------------------------------------
+            */
+
+            const variants = document.querySelectorAll('.pd-variant');
+
+            const priceElement = document.getElementById('pdPrice');
+            const oldPriceElement = document.getElementById('pdOldPrice');
+            const savingElement = document.querySelector('.pd-saving');
+
+            const selectedVariantElement = document.getElementById('pdSelectedVariant');
+            const stockElement = document.getElementById('pdStock');
+            const skuElement = document.getElementById('pdSku');
+
+            const mainImage = document.getElementById('pdMainImage');
+            const quantityInput = document.getElementById('pdQuantity');
+
+            const addCartButton = document.getElementById('pdAddCart');
+            const buyNowButton = document.getElementById('pdBuyNow');
+
+            function formatPrice(price) {
+                return new Intl.NumberFormat('vi-VN').format(Number(price)) + '₫';
+            }
+
+            function selectVariant(button) {
+
+                variants.forEach(item => item.classList.remove('active'));
+
+                button.classList.add('active');
+
+                const name = button.dataset.name;
+                const price = Number(button.dataset.price || 0);
+                const oldPrice = Number(button.dataset.oldPrice || 0);
+                const stock = Number(button.dataset.stock || 0);
+                const sku = button.dataset.sku || 'Đang cập nhật';
+                const image = button.dataset.image;
+
+                // Tên biến thể.
+                selectedVariantElement.textContent = name;
+
+                // Giá bán.
+                priceElement.textContent = formatPrice(price);
+
+                // Giá gốc và giảm giá.
+                if (oldPrice > price) {
+
+                    oldPriceElement.textContent = formatPrice(oldPrice);
+                    oldPriceElement.style.display = '';
+
+                    if (savingElement) {
+                        savingElement.textContent = 'Tiết kiệm ' + formatPrice(oldPrice - price);
+                        savingElement.style.display = '';
+                    }
+
+                } else {
+
+                    oldPriceElement.style.display = 'none';
+
+                    if (savingElement) {
+                        savingElement.style.display = 'none';
+                    }
+
+                }
+
+                // SKU.
+                skuElement.textContent = sku;
+
+                // Tồn kho.
+                if (stock > 0) {
+
+                    stockElement.innerHTML =
+                        '<i class="bi bi-box-seam"></i> Còn hàng (' +
+                        stock + ' sản phẩm sẵn sàng giao ngay)';
+
+                } else {
+
+                    stockElement.innerHTML =
+                        '<i class="bi bi-x-circle"></i> Hết hàng';
+
+                }
+
+                // Giới hạn số lượng.
+                quantityInput.max = Math.max(1, stock);
+                quantityInput.value = 1;
+
+                // Trạng thái nút mua hàng.
+                addCartButton.disabled = stock <= 0;
+                buyNowButton.disabled = stock <= 0;
+
+                // Đổi ảnh chính theo biến thể nếu có.
+                if (image && mainImage) {
+                    mainImage.src = image;
+
+                    document.querySelectorAll('.pd-thumbnail').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                }
+
+                // Cập nhật thông tin trong modal đánh giá.
+                const reviewVariant = document.getElementById('pdReviewVariant');
+                const reviewPrice = document.getElementById('pdReviewProductPrice');
+                const reviewImage = document.getElementById('pdReviewProductImage');
+
+                if (reviewVariant) {
+                    reviewVariant.textContent = name;
+                }
+
+                if (reviewPrice) {
+                    reviewPrice.textContent = formatPrice(price);
+                }
+
+                if (reviewImage && image) {
+                    reviewImage.src = image;
+                }
+
+            }
+
+            variants.forEach(button => {
+
+                button.addEventListener('click', function() {
+                    selectVariant(this);
+                });
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CHỌN ẢNH SẢN PHẨM
+            |--------------------------------------------------------------------------
+            */
+
+            const thumbnails = document.querySelectorAll('.pd-thumbnail');
+
+            thumbnails.forEach(button => {
+
+                button.addEventListener('click', function() {
+
+                    const image = this.dataset.image;
+
+                    if (!image || !mainImage) return;
+
+                    mainImage.src = image;
+
+                    thumbnails.forEach(item => {
+                        item.classList.remove('active');
+                    });
+
+                    this.classList.add('active');
+
+                });
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | TĂNG / GIẢM SỐ LƯỢNG
+            |--------------------------------------------------------------------------
+            */
+
+            const decreaseButton = document.getElementById('pdDecrease');
+            const increaseButton = document.getElementById('pdIncrease');
+
+            decreaseButton?.addEventListener('click', function() {
+
+                let quantity = Number(quantityInput.value);
+                quantityInput.value = Math.max(1, quantity - 1);
+
+            });
+
+            increaseButton?.addEventListener('click', function() {
+
+                let quantity = Number(quantityInput.value);
+                let max = Number(quantityInput.max);
+
+                if (quantity < max) {
+                    quantityInput.value = quantity + 1;
+                }
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CHIA SẺ SẢN PHẨM
+            |--------------------------------------------------------------------------
+            */
+
+            document.getElementById('pdShare')?.addEventListener('click', function() {
+
+                if (navigator.share) {
+
+                    navigator.share({
+                        title: document.title,
+                        url: window.location.href
+                    });
+
+                } else if (navigator.clipboard) {
+
+                    navigator.clipboard.writeText(window.location.href)
+                        .then(() => alert('Đã sao chép liên kết sản phẩm!'));
+
+                }
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | TAB CHI TIẾT
+            |--------------------------------------------------------------------------
+            */
+
+            const tabs = document.querySelectorAll('.pd-detail-tab');
+
+            const tabContents = {
+                specifications: document.getElementById('pdTabSpecifications'),
+                description: document.getElementById('pdTabDescription'),
+                reviews: document.getElementById('pdTabReviews')
+            };
+
+            tabs.forEach(tab => {
+
+                tab.addEventListener('click', function() {
+
+                    const target = this.dataset.tab;
+
+                    tabs.forEach(item => item.classList.remove('active'));
+
+                    Object.values(tabContents).forEach(content => {
+                        content?.classList.remove('active');
+                    });
+
+                    this.classList.add('active');
+
+                    tabContents[target]?.classList.add('active');
+
+                });
+
+            });
+
+        });
+    </script>
+
+@endsection

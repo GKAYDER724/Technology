@@ -13,15 +13,18 @@ use App\Http\Controllers\WarrantyController;
 use App\Http\Controllers\GoogleController;
 use Illuminate\Support\Facades\Route;
 
-//  Trang chủ
+
+// Trang chủ
 Route::get('/', [HomeController::class, 'index']);
 
-//  Danh sách và chi tiết sản phẩm
+
+// Danh sách và chi tiết sản phẩm
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 
 
-//  Đăng nhập
+// ================= ĐĂNG NHẬP =================
+
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
 
@@ -38,7 +41,8 @@ Route::get('/auth/google', [GoogleController::class, 'redirect'])
 Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
 
 
-//  Đăng ký
+// ================= ĐĂNG KÝ =================
+
 Route::get('/register', [AuthController::class, 'showRegister'])
     ->name('register');
 
@@ -47,41 +51,70 @@ Route::post('/register', [AuthController::class, 'register'])
     ->name('register.submit');
 
 
-// Đăng xuất
+// ================= QUÊN MẬT KHẨU =================
+
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->name('password.request');
+
+
+Route::post('/forgot-password', [AuthController::class, 'sendOtp'])
+    ->name('password.sendOtp');
+
+Route::get('/reset-password', function () {
+    return view('auth.reset-password');
+})->name('password.reset');
+
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+    ->name('password.update');
+
+// ================= NHẬP OTP =================
+
+Route::get('/verify-otp', function () {
+    return view('auth.verify-otp');
+})->name('password.verifyOtp');
+
+
+Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])
+    ->name('password.verifyOtp.submit');
+
+Route::get('/resend-otp', [AuthController::class, 'resendOtp'])
+    ->name('password.resendOtp');
+// ================= ĐĂNG XUẤT =================
+
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
 
-// Warranty Routes
+// ================= WARRANTY =================
+
 Route::prefix('warranty')
     ->name('warranty.')
     ->controller(WarrantyController::class)
     ->group(function () {
 
-        // Warranty overview
         Route::get('/', 'index')
             ->name('index');
 
-        // Create warranty request
         Route::get('/create-request', 'create')
             ->name('create');
 
-        // Check warranty status
         Route::get('/status', 'status')
             ->name('status');
 
-        // Warranty history
         Route::get('/history', 'history')
             ->name('history');
+
     });
 
 
-//  Các chức năng yêu cầu đăng nhập
+// ================= CÁC CHỨC NĂNG CẦN ĐĂNG NHẬP =================
+
 Route::middleware('auth')->group(function () {
 
 
-    //  Các chức năng dành cho Customer
+    // Customer
     Route::middleware('role:customer')->group(function () {
 
 
@@ -102,19 +135,20 @@ Route::middleware('auth')->group(function () {
     });
 
 
-    //  Tài khoản
+    // Tài khoản
     Route::get('/account/profile', [AccountController::class, 'profile']);
 
 
-    //  Thông báo
+    // Thông báo
     Route::get('/notifications', [NotificationController::class, 'index']);
 
 
-    //  Đăng xuất
+    // Đăng xuất
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
 
 });
 
 
+// Danh mục
 Route::get('/categories', [CategoryController::class, 'index']);

@@ -6,6 +6,8 @@ use App\Models\Category;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
+use Carbon\Carbon;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -25,5 +27,6 @@ class AppServiceProvider extends ServiceProvider
             $view->with('categories', Category::all());
         });
         Paginator::useBootstrapFive();
+        Carbon::setLocale('vi');
     }
 }

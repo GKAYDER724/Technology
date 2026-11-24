@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'gender',
     'province_city',
     'status',
+    'last_seen',
 ])]
 
 #[Hidden(['password', 'remember_token'])]
@@ -57,6 +58,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         return [
 
             'password' => 'hashed',
+            'last_seen' => 'datetime',
         ];
     }
 
@@ -83,6 +85,16 @@ class User extends Authenticatable implements FilamentUser, HasName
     {
         return $this->hasMany(
             Notification::class,
+            'user_id',
+            'user_id'
+        );
+    }
+}
+        // User có nhiều tin nhắn chat
+    public function chatMessages()
+    {
+        return $this->hasMany(
+            ChatMessage::class,
             'user_id',
             'user_id'
         );

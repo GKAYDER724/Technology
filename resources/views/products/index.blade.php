@@ -281,16 +281,25 @@
 
                                             {{-- THÊM GIỎ HÀNG --}}
                                             @if ($product->stock > 0)
-                                                <form method="POST"
-                                                    action="{{ url('/cart/add/' . $product->product_id) }}">
-                                                    @csrf
+                                                @auth
+                                                    <form method="POST"
+                                                        action="{{ route('cart.add', $product->product_id) }}">
+                                                        @csrf
 
-                                                    <button type="submit" class="catalog-cart-btn"
-                                                        aria-label="Thêm vào giỏ hàng">
+                                                        <input type="hidden" name="quantity" value="1">
+
+                                                        <button type="submit" class="catalog-cart-btn"
+                                                            aria-label="Thêm vào giỏ hàng">
+                                                            <i class="bi bi-cart3"></i>
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <button type="button" class="catalog-cart-btn"
+                                                        aria-label="Đăng nhập để thêm vào giỏ hàng"
+                                                        onclick="requireLoginToCart()">
                                                         <i class="bi bi-cart3"></i>
                                                     </button>
-
-                                                </form>
+                                                @endauth
                                             @endif
 
                                         </div>
@@ -358,5 +367,17 @@
 
         });
     </script>
+    @guest
+        <script>
+            function requireLoginToCart() {
+                const confirmLogin = confirm(
+                    'Bạn cần đăng nhập tài khoản để thêm sản phẩm vào giỏ hàng. Bạn có muốn đăng nhập ngay không?'
+                );
 
+                if (confirmLogin) {
+                    window.location.href = "{{ route('login') }}";
+                }
+            }
+        </script>
+    @endguest
 @endsection

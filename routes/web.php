@@ -45,8 +45,21 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:customer')->group(function () {
 
         // Giỏ hàng và thanh toán
-        Route::get('/cart', [CartController::class, 'index']);
-        Route::get('/checkout', [CartController::class, 'checkout']);
+        Route::get('/cart', [CartController::class, 'index'])
+            ->name('cart.index');
+
+        Route::post('/cart/add/{product_id}', [CartController::class, 'add'])
+            ->name('cart.add');
+
+        Route::patch('/cart/update/{cartItemId}', [CartController::class, 'update'])
+            ->name('cart.update');
+
+        Route::delete('/cart/remove/{cartItemId}', [CartController::class, 'remove'])
+            ->name('cart.remove');
+
+        // Thanh toán
+        Route::get('/checkout', [CartController::class, 'checkout'])
+            ->name('cart.checkout');
 
         // Đơn hàng
         Route::get('/orders', [OrderController::class, 'index']);

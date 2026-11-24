@@ -5706,80 +5706,114 @@ footer:not(.et-footer) a:hover {
     font-size: 9px;
 }
 
-/* Quantity */
+/* =====================================
+   ELECTROTECH - CART ACTIONS
+===================================== */
 
-.et-cart-quantity {
+.et-cart-page .et-cart-quantity {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 68px;
-    height: 24px;
-    overflow: hidden;
-    border: 1px solid #e1e8f2;
-    border-radius: 7px;
-    background: #f9fbfe;
-}
-
-.et-cart-quantity .et-qty-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 21px;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: #647792;
-    cursor: pointer;
-}
-
-.et-cart-quantity .et-qty-btn:hover {
-    background: #eaf1ff;
-    color: var(--cart-primary);
-}
-
-.et-cart-quantity .et-qty-btn:disabled {
-    opacity: .35;
-    cursor: not-allowed;
-}
-
-.et-cart-quantity .et-qty-input {
-    width: 25px;
-    min-width: 0;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    outline: none;
-    background: transparent;
-    color: #17243d;
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: 750;
-    text-align: center;
-    appearance: textfield;
-}
-
-.et-cart-quantity .et-qty-input::-webkit-inner-spin-button,
-.et-cart-quantity .et-qty-input::-webkit-outer-spin-button {
+    gap: 5px;
+    width: 100px;
+    min-width: 100px;
     margin: 0;
-    appearance: none;
 }
 
-.et-cart-remove {
+/* Form số lượng */
+.et-cart-page .et-quantity-form {
+    width: 100%;
+    margin: 0;
+}
+
+/* Nhóm nút - input + */
+.et-cart-page .et-quantity-control {
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 28px;
+    flex-wrap: nowrap;
+    gap: 4px;
+    width: 100%;
+}
+
+/* Nút cộng trừ */
+.et-cart-page .et-qty-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 25px;
+    width: 25px;
+    height: 29px;
     padding: 0;
-    border: 0;
+
+    border: 1px solid #dce4ef;
+    border-radius: 6px;
+    background: #fff;
+
+    color: #172554;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.et-cart-page .et-qty-btn:hover {
+    background: #fff5cc;
+    border-color: #f5c400;
+}
+
+/* Ô số lượng */
+.et-cart-page .et-qty-input {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 29px;
+    padding: 0 2px;
+
+    border: 1px solid #dce4ef;
+    border-radius: 6px;
+
+    background: #fff;
+    color: #172554;
+
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+}
+
+.et-cart-page .et-qty-input:focus {
+    border-color: #2563eb;
+}
+
+/* Nút xóa */
+.et-cart-page .et-remove-form {
+    display: block;
+    width: 100%;
+    margin: 0;
+    text-align: center;
+}
+
+.et-cart-page .et-remove-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    padding: 2px 4px;
+    border: none;
     background: transparent;
-    color: #8b9ab1;
+
+    color: #ef4444;
+    font-size: 11px;
+    white-space: nowrap;
     cursor: pointer;
 }
 
-.et-cart-remove:hover {
-    color: #ef4444;
+.et-cart-page .et-remove-btn:hover {
+    color: #b91c1c;
+    text-decoration: underline;
 }
 
 /* Continue shopping */

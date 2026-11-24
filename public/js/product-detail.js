@@ -291,50 +291,127 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+
     // ========================================
-    // 7. ADD TO CART - FRONTEND DEMO
+    // 7. ADD TO CART - CONNECT LARAVEL
     // ========================================
 
-    function getSelectedProduct() {
+    const cartForm = document.getElementById('pdCartForm');
+    const cartVariantInput = document.getElementById('pdCartVariantId');
+    const cartQuantityInput = document.getElementById('pdCartQuantity');
+    const cartBuyNowInput = document.getElementById('pdCartBuyNow');
+
+    async function submitCart(buyNow = false) {
+        if (!cartForm || !cartVariantInput || !cartQuantityInput) {
+            notify('Không tìm thấy biểu mẫu giỏ hàng.', 'danger');
+            return;
+        }
+
         const variant = getSelectedVariant();
+        const quantity = Number(quantityInput?.value) || 1;
 
-        return {
-            name: productName,
-            variant: variant?.dataset.name || '',
-            price: selectedPrice,
-            quantity: Number(quantityInput?.value) || 1
-        };
+        // Kiểm tra sản phẩm có biến thể hay không.
+        if (variants.length > 0 && !variant) {
+            notify('Vui lòng chọn phiên bản sản phẩm.', 'warning');
+            return;
+        }
+
+        // Kiểm tra số lượng.
+        if (quantity < 1) {
+            notify('Số lượng sản phẩm không hợp lệ.', 'warning');
+            return;
+        }
+
+        const stock = variant
+            ? getStock(variant)
+            : Number(page.dataset.productStock) || 0;
+
+        if (quantity > stock) {
+            notify(
+                `Số lượng vượt quá tồn kho. Hiện chỉ còn ${stock} sản phẩm.`,
+                'warning'
+            );
+            return;
+        }
+
+        // Gán dữ liệu vào form.
+        cartVariantInput.value = variant
+            ? variant.dataset.variantId || ''
+            : '';
+
+        cartQuantityInput.value = String(quantity);
+        cartBuyNowInput.value = buyNow ? '1' : '0';
+
+        const submitButton = buyNow
+            ? $('#pdBuyNow')
+            : $('#pdAddCart');
+
+        if (submitButton) {
+            submitButton.disabled = true;
+        }
+
+        try {
+            const formData = new FormData(cartForm);
+
+            const response = await fetch(cartForm.action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.message || 'Không thể thêm sản phẩm vào giỏ hàng.'
+                );
+            }
+
+            notify(
+                data.message || 'Đã thêm sản phẩm vào giỏ hàng.',
+                'success'
+            );
+
+            // Cập nhật số lượng giỏ hàng nếu có phần tử hiển thị.
+            document.querySelectorAll('[data-cart-count]').forEach(element => {
+                element.textContent = data.cart_count;
+            });
+
+            // Mua ngay: chuyển đến trang giỏ hàng.
+            if (buyNow && data.redirect) {
+                window.location.href = data.redirect;
+            }
+
+        } catch (error) {
+            console.error('Cart error:', error);
+
+            notify(
+                error.message || 'Có lỗi xảy ra khi thêm giỏ hàng.',
+                'danger'
+            );
+
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+            }
+        }
     }
 
-    $('#pdAddCart')?.addEventListener('click', function () {
-        const product = getSelectedProduct();
-
-        notify(
-            `Sản phẩm: ${product.name}\n` +
-            `Phiên bản: ${product.variant}\n` +
-            `Số lượng: ${product.quantity}\n` +
-            `Giá: ${money(product.price)}\n\n` +
-            'Đây là bản demo. Chưa lưu vào giỏ hàng hệ thống.',
-            'info'
-        );
+    // Nút thêm vào giỏ hàng.
+    $('#pdAddCart')?.addEventListener('click', function (event) {
+        event.preventDefault();
+        submitCart(false);
     });
 
-    // ========================================
-    // 8. BUY NOW - FRONTEND DEMO
-    // ========================================
-
-    $('#pdBuyNow')?.addEventListener('click', function () {
-        const product = getSelectedProduct();
-
-        notify(
-            `Bạn đã chọn mua ${product.name}.\n` +
-            `Phiên bản: ${product.variant}\n` +
-            `Số lượng: ${product.quantity}\n` +
-            `Tạm tính: ${money(product.price * product.quantity)}\n\n` +
-            'Chức năng thanh toán chưa được kết nối.',
-            'info'
-        );
+    // Nút mua ngay.
+    $('#pdBuyNow')?.addEventListener('click', function (event) {
+        event.preventDefault();
+        submitCart(true);
     });
+
 
     // ========================================
     // 9. REVIEW MODAL
@@ -345,6 +422,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const closeReviewButton = document.getElementById('pdCloseReviewModal');
     const reviewForm = document.getElementById('pdReviewForm');
 
+    // Khởi tạo biến thể sản phẩm
+    if (initialVariant) {
+        updateVariant(initialVariant);
+    }
+
+    // Chỉ bỏ qua phần đánh giá nếu không có modal
     if (!reviewModal || !reviewForm) return;
 
     const reviewRating = document.getElementById('pdReviewRating');
@@ -380,11 +463,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function openReview() {
         const activeVariant = getSelectedVariant();
-
-        if (activeVariant) {
-            updateVariant(activeVariant);
-        }
-
         reviewModal.classList.add('is-open');
         reviewModal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('pd-review-modal-open');

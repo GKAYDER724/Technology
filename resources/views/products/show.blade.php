@@ -5,21 +5,12 @@
 @section('content')
 
     @php
-        /*
-        |--------------------------------------------------------------------------
-        | XỬ LÝ DỮ LIỆU SẢN PHẨM
-        |--------------------------------------------------------------------------
-        */
-
         // Chọn biến thể đầu tiên còn hoạt động nếu sản phẩm có biến thể.
         $activeVariants = $variants ?? collect();
-
         $selectedVariant = $activeVariants->first();
-
         // Giá sản phẩm mặc định.
         $basePrice = $product->base_price ?? 0;
         $salePrice = $product->sale_price ?? null;
-
         $sellingPrice = $salePrice !== null && $salePrice > 0 && $salePrice < $basePrice ? $salePrice : $basePrice;
 
         // Nếu có biến thể thì lấy giá của biến thể đầu tiên.
@@ -41,22 +32,12 @@
             $salePrice !== null && $salePrice > 0 && $salePrice < $basePrice
                 ? round((($basePrice - $salePrice) / $basePrice) * 100)
                 : 0;
-
         // Tồn kho mặc định.
         $stock = $selectedVariant ? (int) $selectedVariant->stock : (int) $product->stock;
-
         // SKU.
         $sku = $selectedVariant->sku ?? null;
-
         // Định dạng giá tiền.
         $formatPrice = fn($price) => number_format((float) $price, 0, ',', '.') . '₫';
-
-        /*
-        |--------------------------------------------------------------------------
-        | XỬ LÝ HÌNH ẢNH
-        |--------------------------------------------------------------------------
-        */
-
         // Hỗ trợ cả ảnh Cloudinary và ảnh lưu trong storage.
         $imageUrl = function ($image) {
             if (!$image) {
@@ -72,35 +53,24 @@
 
         // Danh sách ảnh sản phẩm.
         $gallery = $productImages ?? collect();
-
         // Ảnh đại diện.
         $mainImage = $gallery->firstWhere('is_primary', 1) ?? $gallery->first();
-
         $mainImageUrl = $mainImage ? $imageUrl($mainImage->image) : asset('images/no-image.png');
-
         // Nếu biến thể có ảnh riêng thì ưu tiên ảnh biến thể.
         if ($selectedVariant && !empty($selectedVariant->image)) {
             $mainImageUrl = $imageUrl($selectedVariant->image);
         }
-
         // Tên biến thể đang chọn.
         $selectedVariantName = $selectedVariant ? $selectedVariant->variant_name : 'Mặc định';
-
     @endphp
 
     <div class="product-detail-page" data-product-name="{{ $product->name }}" data-product-id="{{ $product->product_id }}">
-
         {{-- BREADCRUMB --}}
         <nav class="pd-breadcrumb">
-
             <a href="{{ url('/') }}">Trang chủ</a>
-
             <i class="bi bi-chevron-right"></i>
-
             <a href="{{ url('/products') }}">Sản phẩm</a>
-
             <i class="bi bi-chevron-right"></i>
-
             @if (!empty($product->category_name))
                 <a href="{{ url('/products?category=' . $product->category_id) }}">
                     {{ $product->category_name }}
@@ -108,36 +78,23 @@
 
                 <i class="bi bi-chevron-right"></i>
             @endif
-
             <span>{{ $product->name }}</span>
-
         </nav>
-
-
         {{-- PRODUCT OVERVIEW --}}
         <section class="pd-main-card">
-
             {{-- LEFT: PRODUCT GALLERY --}}
             <div class="pd-gallery">
-
                 <div class="pd-main-image">
-
                     @if ($discount > 0)
                         <span class="pd-discount">
                             Giảm {{ $discount }}%
                         </span>
                     @endif
-
                     <img id="pdMainImage" src="{{ $mainImageUrl }}" alt="{{ $product->name }}">
-
                 </div>
-
-
                 {{-- PRODUCT THUMBNAILS --}}
                 <div class="pd-thumbnails">
-
                     @if ($gallery->isNotEmpty())
-
                         @foreach ($gallery as $index => $image)
                             <button type="button"
                                 class="pd-thumbnail {{ $image->image === ($mainImage->image ?? null) ? 'active' : '' }}"
@@ -146,86 +103,59 @@
 
                                 <img src="{{ $imageUrl($image->image) }}"
                                     alt="{{ $product->name }} - Ảnh {{ $index + 1 }}">
-
                             </button>
                         @endforeach
                     @else
                         <button type="button" class="pd-thumbnail active">
                             <img src="{{ asset('images/no-image.png') }}" alt="{{ $product->name }}">
                         </button>
-
                     @endif
-
                 </div>
-
-
                 <div class="pd-gallery-bottom">
-
                     <button type="button" id="pdShare">
                         <i class="bi bi-share"></i>
                         Chia sẻ sản phẩm
                     </button>
-
                     <button type="button" id="pdFavorite">
                         <i class="bi bi-heart"></i>
                         Yêu thích
                     </button>
-
                 </div>
-
             </div>
-
-
             {{-- RIGHT: PRODUCT INFORMATION --}}
             <div class="pd-information">
-
                 {{-- BRAND / SKU --}}
                 <div class="pd-product-meta">
-
                     <span class="pd-brand">
                         {{ $product->category_name ?? 'ELECTROTECH' }}
                     </span>
-
                     <span class="pd-meta-divider">|</span>
-
                     <span>
                         Mã SP:
                         <span id="pdSku">
                             {{ $sku ?? 'Đang cập nhật' }}
                         </span>
                     </span>
-
                 </div>
-
-
                 {{-- PRODUCT NAME --}}
                 <h1 class="pd-product-title">
                     {{ $product->name }}
                 </h1>
-
-
                 {{-- RATING --}}
                 <div class="pd-rating-row">
-
                     <span class="pd-rating">
                         <i class="bi bi-star"></i>
                         Chưa có đánh giá
                     </span>
-
                     <a href="#pd-reviews" class="pd-review-count">
                         Xem đánh giá sản phẩm
                     </a>
-
                 </div>
-
-
                 {{-- PRICE --}}
                 <div class="pd-price-box">
-
                     <strong id="pdPrice">
                         {{ $formatPrice($sellingPrice) }}
                     </strong>
-
                     @if ($discount > 0)
                         <del id="pdOldPrice">
                             {{ $formatPrice($basePrice) }}
@@ -237,13 +167,10 @@
                         </span>
                     @else
                         <del id="pdOldPrice" style="display:none;"></del>
-
                         <span class="pd-saving" style="display:none;"></span>
                     @endif
 
                 </div>
-
-
                 {{-- VARIANTS --}}
                 <div class="pd-variant-heading">
 
@@ -254,8 +181,6 @@
                     </strong>
 
                 </div>
-
-
                 <div class="pd-variants">
 
                     @forelse ($activeVariants as $index => $variant)
@@ -317,8 +242,6 @@
                     @endforelse
 
                 </div>
-
-
                 {{-- STOCK --}}
                 <div class="pd-stock-row">
 
@@ -337,10 +260,7 @@
                         @endif
 
                     </span>
-
                 </div>
-
-
                 {{-- PROMOTION --}}
                 <div class="pd-promotion">
 
@@ -390,6 +310,18 @@
 
 
                 {{-- ACTIONS --}}
+                {{-- FORM KẾT NỐI GIỎ HÀNG --}}
+                <form id="pdCartForm" action="{{ route('cart.add', $product->product_id) }}" method="POST" hidden>
+
+                    @csrf
+
+                    <input type="hidden" name="variant_id" id="pdCartVariantId">
+
+                    <input type="hidden" name="quantity" id="pdCartQuantity" value="1">
+
+                    <input type="hidden" name="buy_now" id="pdCartBuyNow" value="0">
+
+                </form>
                 <div class="pd-action-buttons">
 
                     <button type="button" class="pd-add-cart" id="pdAddCart" {{ $stock <= 0 ? 'disabled' : '' }}>
@@ -1172,6 +1104,48 @@
                 });
 
             });
+
+            document.querySelectorAll('.et-quantity-control').forEach(function(control) {
+
+                const input = control.querySelector('.et-qty-input');
+                const form = control.closest('.et-quantity-form');
+
+                if (!input || !form) return;
+
+                control.querySelectorAll('.et-qty-btn').forEach(function(button) {
+
+                    button.addEventListener('click', function() {
+
+                        let quantity = parseInt(input.value) || 1;
+
+                        if (button.dataset.action === 'minus') {
+                            quantity = Math.max(1, quantity - 1);
+                        }
+
+                        if (button.dataset.action === 'plus') {
+                            quantity += 1;
+                        }
+
+                        input.value = quantity;
+
+                        form.requestSubmit();
+
+                    });
+
+                });
+
+                input.addEventListener('change', function() {
+
+                    let quantity = parseInt(input.value) || 1;
+
+                    input.value = Math.max(1, quantity);
+
+                    form.requestSubmit();
+
+                });
+
+            });
+
 
         });
     </script>

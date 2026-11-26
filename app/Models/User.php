@@ -89,8 +89,8 @@ class User extends Authenticatable implements FilamentUser, HasName
             'user_id'
         );
     }
-}
-        // User có nhiều tin nhắn chat
+
+    // User có nhiều tin nhắn chat
     public function chatMessages()
     {
         return $this->hasMany(

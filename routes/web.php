@@ -135,6 +135,14 @@ Route::middleware('auth')->group(function () {
     // Đăng xuất
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
+    // Chat
+    Route::get('/chat', [ChatController::class, 'index'])
+    ->name('chat.index');
+
+    Route::post('/chat', [ChatController::class, 'store'])
+    ->name('chat.store');
+    Route::get('/chat/messages', [ChatController::class, 'messages'])
+    ->name('chat.messages');
 });
 
 Route::prefix('warranty')

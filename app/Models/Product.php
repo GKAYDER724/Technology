@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Product extends Model
 {
@@ -46,5 +47,34 @@ class Product extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class, 'product_id', 'product_id');
+    }
+
+    // Lấy ảnh đại diện chính
+    public function primaryImage(): HasOne
+    {
+        return $this->hasOne(
+            ProductImage::class,
+            'product_id',
+            'product_id'
+        )->where('is_primary', 1);
+    }
+
+     public function syncTotalStock(): void
+    {
+        if ($this->variants()->exists()) {
+
+            $totalStock = $this->variants()->sum('stock');
+
+            $this->updateQuietly([
+                'stock' => $totalStock
+            ]);
+        }
+    }
+
+
+    // Hoàn kho sản phẩm
+    public function restoreStock(int $quantity): void
+    {
+        $this->increment('stock', $quantity);
     }
 }
